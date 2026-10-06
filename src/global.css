@@ -1,0 +1,180 @@
+/* Global CSS - KuliahKu */
+:root {
+  --md-icon-font: 'Material Symbols Rounded';
+  font-family: var(--md-ref-typeface-plain);
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: var(--md-sys-color-on-surface);
+  background-color: var(--md-sys-color-surface);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Typography scale tokens */
+  --md-sys-typescale-display-large-size: 3.5625rem;
+  --md-sys-typescale-display-medium-size: 2.8125rem;
+  --md-sys-typescale-display-small-size: 2.25rem;
+  
+  --md-sys-typescale-headline-large-size: 2rem;
+  --md-sys-typescale-headline-medium-size: 1.75rem;
+  --md-sys-typescale-headline-small-size: 1.5rem;
+  
+  --md-sys-typescale-title-large-size: 1.375rem;
+  --md-sys-typescale-title-medium-size: 1rem;
+  --md-sys-typescale-title-small-size: 0.875rem;
+  
+  --md-sys-typescale-body-large-size: 1rem;
+  --md-sys-typescale-body-medium-size: 0.875rem;
+  --md-sys-typescale-body-small-size: 0.75rem;
+  
+  --md-sys-typescale-label-large-size: 0.875rem;
+  --md-sys-typescale-label-medium-size: 0.75rem;
+  --md-sys-typescale-label-small-size: 0.6875rem;
+
+  --md-ref-typeface-weight-regular: 400;
+  --md-ref-typeface-weight-medium: 500;
+  --md-ref-typeface-weight-bold: 700;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+/* Material Design 3 Typescale Helper Classes */
+.typescale-headline-large {
+  font-family: var(--md-ref-typeface-brand);
+  font-size: var(--md-sys-typescale-headline-large-size);
+  font-weight: var(--md-ref-typeface-weight-regular);
+  line-height: 1.25;
+}
+
+.typescale-headline-medium {
+  font-family: var(--md-ref-typeface-brand);
+  font-size: var(--md-sys-typescale-headline-medium-size);
+  font-weight: var(--md-ref-typeface-weight-regular);
+  line-height: 1.3;
+}
+
+.typescale-headline-small {
+  font-family: var(--md-ref-typeface-brand);
+  font-size: var(--md-sys-typescale-headline-small-size);
+  font-weight: var(--md-ref-typeface-weight-regular);
+  line-height: 1.35;
+}
+
+.typescale-title-large {
+  font-family: var(--md-ref-typeface-brand);
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-ref-typeface-weight-medium);
+  line-height: 1.3;
+}
+
+.typescale-title-medium {
+  font-family: var(--md-ref-typeface-brand);
+  font-size: var(--md-sys-typescale-title-medium-size);
+  font-weight: var(--md-ref-typeface-weight-medium);
+  line-height: 1.4;
+}
+
+.typescale-title-small {
+  font-family: var(--md-ref-typeface-brand);
+  font-size: var(--md-sys-typescale-title-small-size);
+  font-weight: var(--md-ref-typeface-weight-medium);
+  line-height: 1.45;
+}
+
+.typescale-body-large {
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: var(--md-ref-typeface-weight-regular);
+  line-height: 1.5;
+}
+
+.typescale-body-medium {
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-body-medium-size);
+  font-weight: var(--md-ref-typeface-weight-regular);
+  line-height: 1.45;
+}
+
+.typescale-body-small {
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-body-small-size);
+  font-weight: var(--md-ref-typeface-weight-regular);
+  line-height: 1.4;
+}
+
+.typescale-label-large {
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-ref-typeface-weight-medium);
+  line-height: 1.4;
+}
+
+.typescale-label-medium {
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-ref-typeface-weight-medium);
+  line-height: 1.35;
+}
+
+.typescale-label-small {
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-ref-typeface-weight-medium);
+  line-height: 1.3;
+}
+
+/* Material Symbols Icon helper */
+.material-symbols-rounded {
+  font-family: 'Material Symbols Rounded';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Safe area insets */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}

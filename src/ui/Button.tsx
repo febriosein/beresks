@@ -47,6 +47,8 @@ export function Button({
   const mergedStyle: CSSProperties = {
     fontFamily: 'var(--md-ref-typeface-brand)',
     fontWeight: 'var(--md-ref-typeface-weight-bold, 700)',
+    padding: variant === 'text' ? '6px 12px' : '10px 20px',
+    borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
     // @ts-expect-error - CSS custom properties for Material Web Button
     '--md-filled-button-label-text-weight': '700',
     '--md-outlined-button-label-text-weight': '700',
@@ -58,13 +60,17 @@ export function Button({
     '--md-filled-button-container-height': '44px',
     '--md-outlined-button-container-height': '44px',
     '--md-elevated-button-container-height': '44px',
-    '--md-filled-button-label-text-size': '15px',
-    '--md-outlined-button-label-text-size': '15px',
-    '--md-elevated-button-label-text-size': '15px',
-    '--md-filled-button-leading-space': '16px',
-    '--md-filled-button-trailing-space': '16px',
-    '--md-outlined-button-leading-space': '16px',
-    '--md-outlined-button-trailing-space': '16px',
+    '--md-filled-button-label-text-size': '14px',
+    '--md-outlined-button-label-text-size': '14px',
+    '--md-elevated-button-label-text-size': '14px',
+    '--md-filled-button-leading-space': '20px',
+    '--md-filled-button-trailing-space': '20px',
+    '--md-filled-button-with-leading-icon-leading-space': '16px',
+    '--md-filled-button-with-leading-icon-trailing-space': '20px',
+    '--md-outlined-button-leading-space': '20px',
+    '--md-outlined-button-trailing-space': '20px',
+    '--md-outlined-button-with-leading-icon-leading-space': '16px',
+    '--md-outlined-button-with-leading-icon-trailing-space': '20px',
     ...style,
   };
 

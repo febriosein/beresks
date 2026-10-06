@@ -268,15 +268,19 @@ export function Jadwal() {
                 Nikmati waktu luangmu atau cicil tugas yang ada.
               </p>
               <Button
-                variant="outlined"
+                variant="filled"
                 icon="add"
                 onClick={() => {
                   setHariInput(hariTerpilih);
                   bukaDialog();
                 }}
                 style={{
+                  padding: '10px 20px',
+                  fontSize: 'var(--md-sys-typescale-label-large-size, 14px)',
                   fontWeight: 700,
                   borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 Tambah Sesi Hari Ini

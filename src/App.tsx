@@ -101,6 +101,7 @@ export function App() {
             backgroundColor: 'var(--md-sys-color-surface-container-highest)',
             color: 'var(--md-sys-color-on-surface-variant)',
             padding: '6px 16px',
+            paddingTop: 'calc(6px + env(safe-area-inset-top, 0px))',
             textAlign: 'center',
             fontSize: 'var(--md-sys-typescale-label-small-size)',
             display: 'flex',
@@ -117,7 +118,13 @@ export function App() {
       )}
 
       {/* Main Content Viewport */}
-      <main style={{ flex: 1, width: '100%' }}>
+      <main
+        style={{
+          flex: 1,
+          width: '100%',
+          paddingTop: isOnline ? 'env(safe-area-inset-top, 0px)' : '0px',
+        }}
+      >
         <Routes>
           <Route path="/" element={<HariIni />} />
           <Route path="/jadwal" element={<Jadwal />} />

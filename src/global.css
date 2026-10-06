@@ -218,7 +218,18 @@ md-dialog::part(scrim) {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Safe area insets */
+/* Safe area insets & Mobile Navigation */
+:root {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.m3-navigation-bar {
+  height: calc(80px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  box-sizing: border-box;
+}
+
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }

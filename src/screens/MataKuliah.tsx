@@ -117,7 +117,7 @@ export function MataKuliah() {
   };
 
   return (
-    <div style={{ padding: '16px', maxWidth: '640px', margin: '0 auto', width: '100%', paddingBottom: '120px' }}>
+    <div style={{ padding: '16px', maxWidth: '640px', margin: '0 auto', width: '100%', paddingBottom: 'calc(130px + env(safe-area-inset-bottom, 0px))' }}>
       {/* Header */}
       <div
         style={{

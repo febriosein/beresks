@@ -286,7 +286,7 @@ export function DetailMataKuliah() {
   };
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', paddingBottom: '96px' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))' }}>
       {/* Top App Bar & Header */}
       <div
         style={{

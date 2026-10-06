@@ -398,7 +398,7 @@ export function Tugas() {
         margin: '0 auto',
         width: '100%',
         padding: '16px',
-        paddingBottom: '120px',
+        paddingBottom: 'calc(130px + env(safe-area-inset-bottom, 0px))',
       }}
     >
       {/* Header */}

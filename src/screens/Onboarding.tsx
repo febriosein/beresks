@@ -83,7 +83,7 @@ export function Onboarding() {
         minHeight: '100dvh',
         backgroundColor: 'var(--md-sys-color-surface)',
         color: 'var(--md-sys-color-on-surface)',
-        padding: '24px 16px',
+        padding: 'calc(24px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)) 16px',
         maxWidth: '560px',
         margin: '0 auto',
         justifyContent: 'space-between',

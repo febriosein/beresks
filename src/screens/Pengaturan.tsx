@@ -151,7 +151,7 @@ export function Pengaturan() {
   };
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', padding: '16px', paddingBottom: '96px' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', padding: '16px', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))' }}>
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
         <IconButton

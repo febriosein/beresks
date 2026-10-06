@@ -58,7 +58,7 @@ export function Snackbar(): ReactNode {
       aria-live="polite"
       style={{
         position: 'fixed',
-        bottom: 'calc(80px + env(safe-area-inset-bottom, 0px))',
+        bottom: 'calc(92px + env(safe-area-inset-bottom, 0px))',
         left: '50%',
         transform: 'translateX(-50%)',
         width: 'calc(100% - 32px)',

@@ -134,8 +134,8 @@ export function App() {
         <div
           style={{
             position: 'fixed',
-            bottom: 'calc(76px + min(env(safe-area-inset-bottom, 0px), 14px))',
-            right: '16px',
+            bottom: 'calc(90px + min(env(safe-area-inset-bottom, 0px), 14px))',
+            right: '20px',
             zIndex: 45,
           }}
         >

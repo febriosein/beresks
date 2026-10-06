@@ -66,7 +66,10 @@ export function Icon({
           <path d={path} />
         </svg>
       ) : (
-        name
+        import.meta.env.DEV ? (
+          console.warn(`[BereSKS Icon] Icon "${name}" belum ada di iconsData.ts`),
+          null
+        ) : null
       )}
     </md-icon>
   );

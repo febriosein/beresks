@@ -31,10 +31,10 @@ export function NavigationBar({
       className={`m3-navigation-bar ${className}`}
       style={{
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         justifyContent: 'space-around',
         width: '100%',
-        height: 'calc(80px + env(safe-area-inset-bottom, 0px))',
+        height: '68px',
         boxSizing: 'border-box',
         backgroundColor: 'var(--md-sys-color-surface-container)',
         borderTop: '1px solid var(--md-sys-color-surface-variant)',
@@ -43,7 +43,7 @@ export function NavigationBar({
         left: 0,
         right: 0,
         zIndex: 50,
-        paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+        padding: '6px 0',
         ...style,
       }}
     >
@@ -61,11 +61,12 @@ export function NavigationBar({
             onClick={() => onChange(item.id)}
             style={{
               flex: 1,
-              height: '80px',
+              height: '100%',
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
+              gap: '4px',
               background: 'none',
               border: 'none',
               cursor: 'pointer',
@@ -138,9 +139,9 @@ export function NavigationBar({
                 color: isActive
                   ? 'var(--md-sys-color-on-surface)'
                   : 'var(--md-sys-color-on-surface-variant)',
-                marginTop: '4px',
                 lineHeight: 1.2,
                 whiteSpace: 'nowrap',
+                textAlign: 'center',
                 transition: 'color 200ms ease',
               }}
             >

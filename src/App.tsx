@@ -68,14 +68,14 @@ export function App() {
   };
 
   const navItems = [
-    { id: '/', label: 'Hari Ini', icon: 'today', activeIcon: 'calendar_today' },
-    { id: '/jadwal', label: 'Jadwal', icon: 'calendar_month', activeIcon: 'date_range' },
-    { id: '/matkul', label: 'Mata Kuliah', icon: 'school', activeIcon: 'menu_book' },
+    { id: '/', label: 'Hari Ini', icon: 'today', activeIcon: 'today' },
+    { id: '/jadwal', label: 'Jadwal', icon: 'calendar_month', activeIcon: 'calendar_month' },
+    { id: '/matkul', label: 'Mata Kuliah', icon: 'menu_book', activeIcon: 'menu_book' },
     {
       id: '/tugas',
       label: 'Tugas',
       icon: 'assignment',
-      activeIcon: 'task_alt',
+      activeIcon: 'assignment',
       badge: tugasMendesak.length > 0 ? tugasMendesak.length : undefined,
     },
   ];
@@ -87,7 +87,7 @@ export function App() {
       style={{
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100dvh',
+        minHeight: '100vh',
         backgroundColor: 'var(--md-sys-color-surface)',
         color: 'var(--md-sys-color-on-surface)',
         position: 'relative',
@@ -101,7 +101,6 @@ export function App() {
             backgroundColor: 'var(--md-sys-color-surface-container-highest)',
             color: 'var(--md-sys-color-on-surface-variant)',
             padding: '6px 16px',
-            paddingTop: 'calc(6px + env(safe-area-inset-top, 0px))',
             textAlign: 'center',
             fontSize: 'var(--md-sys-typescale-label-small-size)',
             display: 'flex',
@@ -118,13 +117,7 @@ export function App() {
       )}
 
       {/* Main Content Viewport */}
-      <main
-        style={{
-          flex: 1,
-          width: '100%',
-          paddingTop: isOnline ? 'env(safe-area-inset-top, 0px)' : '0px',
-        }}
-      >
+      <main style={{ flex: 1, width: '100%' }}>
         <Routes>
           <Route path="/" element={<HariIni />} />
           <Route path="/jadwal" element={<Jadwal />} />
@@ -141,7 +134,7 @@ export function App() {
         <div
           style={{
             position: 'fixed',
-            bottom: 'calc(88px + env(safe-area-inset-bottom, 0px))',
+            bottom: '80px',
             right: '16px',
             zIndex: 45,
           }}

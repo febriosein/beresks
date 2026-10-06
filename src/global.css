@@ -46,18 +46,22 @@
   padding: 0;
 }
 
-html, body {
+html {
   width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-  overscroll-behavior-y: contain;
+  min-height: 100%;
+  min-height: -webkit-fill-available;
   background-color: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-surface);
 }
 
 body {
+  width: 100%;
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  background-color: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
   display: flex;
   flex-direction: column;
 }
@@ -66,7 +70,7 @@ body {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  min-height: 100dvh;
+  min-height: -webkit-fill-available;
   width: 100%;
 }
 
@@ -225,9 +229,21 @@ md-dialog::part(scrim) {
 }
 
 .m3-navigation-bar {
-  height: calc(80px + env(safe-area-inset-bottom, 0px));
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  height: 68px;
+  padding: 6px 0;
+  bottom: 0;
   box-sizing: border-box;
+}
+
+.m3-navigation-bar::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background-color: var(--md-sys-color-surface-container);
+  pointer-events: none;
 }
 
 .safe-bottom {

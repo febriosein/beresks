@@ -1,5 +1,6 @@
 export * from './Icon.js';
 export * from './Fab.js';
+export * from './ExtendedFab.js';
 export * from './Button.js';
 export * from './IconButton.js';
 export * from './TextField.js';
@@ -15,3 +16,6 @@ export * from './SegmentedButton.js';
 export * from './BottomSheet.js';
 export * from './Snackbar.js';
 export * from './NavigationBar.js';
+export * from './NavigationRail.js';
+export * from './fabStore.js';
+export * from './layout/index.js';

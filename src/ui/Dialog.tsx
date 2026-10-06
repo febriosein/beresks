@@ -81,22 +81,25 @@ export function Dialog({
             <span style={{ fontWeight: 700 }}>{headline}</span>
           </div>
         }
-        style={style}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {children}
-          {actions && (
+        footer={
+          actions ? (
             <div
               style={{
-                marginTop: '12px',
-                paddingTop: '16px',
-                borderTop: '1px solid var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.08))',
                 width: '100%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'flex-end',
+                gap: '8px',
               }}
             >
               {actions}
             </div>
-          )}
+          ) : undefined
+        }
+        style={style}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          {children}
         </div>
       </BottomSheet>
     );

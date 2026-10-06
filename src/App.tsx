@@ -1,14 +1,21 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate, useLocation } from 'react-router';
+import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import {
   NavigationBar,
-  Fab,
+  NavigationRail,
+  ExtendedFab,
   Snackbar,
   Icon,
+  useFabStore,
 } from './ui/index.js';
 import { QuickAddSheet } from './features/quick-add/QuickAddSheet.js';
 import { useQuickAddStore } from './features/quick-add/useQuickAddStore.js';
-import { useDaftarSemester, useTugasMendesak } from './data/repo/index.js';
+import {
+  useDaftarSemester,
+  useTugasMendesak,
+  usePengaturan,
+} from './data/repo/index.js';
 
 // Layar
 import { HariIni } from './screens/HariIni.js';
@@ -25,8 +32,55 @@ export function App() {
 
   const daftarSemester = useDaftarSemester();
   const tugasMendesak = useTugasMendesak(99) || [];
+  const pengaturan = usePengaturan();
 
   const { openQuickAdd } = useQuickAddStore();
+  const currentFabAction = useFabStore((s) => s.currentAction);
+  const shouldReduceMotion = useReducedMotion();
+
+  // Deteksi Desktop / Tablet (>= 840px)
+  const [isDesktop, setIsDesktop] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return window.innerWidth >= 840;
+  });
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mql = window.matchMedia('(min-width: 840px)');
+    const update = () => setIsDesktop(mql.matches);
+    update();
+    mql.addEventListener('change', update);
+    return () => mql.removeEventListener('change', update);
+  }, []);
+
+  // Sinkronisasi Tema Tampilan & Status Bar Color
+  useEffect(() => {
+    const root = document.documentElement;
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+
+    const updateThemeMeta = (isDark: boolean) => {
+      if (metaThemeColor) {
+        metaThemeColor.setAttribute('content', isDark ? '#191c1b' : '#006b5a');
+      }
+    };
+
+    if (pengaturan.tema === 'gelap') {
+      root.dataset.theme = 'dark';
+      updateThemeMeta(true);
+    } else if (pengaturan.tema === 'terang') {
+      root.dataset.theme = 'light';
+      updateThemeMeta(false);
+    } else {
+      // Tema Sistem
+      delete root.dataset.theme;
+      const mql = window.matchMedia('(prefers-color-scheme: dark)');
+      updateThemeMeta(mql.matches);
+
+      const listener = (e: MediaQueryListEvent) => updateThemeMeta(e.matches);
+      mql.addEventListener('change', listener);
+      return () => mql.removeEventListener('change', listener);
+    }
+  }, [pengaturan.tema]);
 
   // Indikator Offline
   const [isOnline, setIsOnline] = useState(
@@ -82,11 +136,52 @@ export function App() {
 
   const showShell = !isOnboarding;
 
+  // Resolusi Aksi FAB Kontekstual
+  const getResolvedFabAction = () => {
+    if (isOnboarding || location.pathname === '/pengaturan') {
+      return null;
+    }
+
+    if (currentFabAction) {
+      if (currentFabAction.hide) return null;
+      return currentFabAction;
+    }
+
+    const path = location.pathname;
+    if (path === '/' || path.startsWith('/tugas')) {
+      return {
+        label: 'Tugas',
+        icon: 'add_task',
+        ariaLabel: 'Catat Tugas Baru',
+        onClick: () => openQuickAdd(),
+      };
+    }
+    if (path.startsWith('/jadwal')) {
+      return {
+        label: 'Sesi',
+        icon: 'add',
+        ariaLabel: 'Tambah Sesi Kuliah Baru',
+        onClick: () => window.dispatchEvent(new CustomEvent('beresks:buka-tambah-sesi')),
+      };
+    }
+    if (path.startsWith('/matkul')) {
+      return {
+        label: 'Matkul',
+        icon: 'add',
+        ariaLabel: 'Tambah Mata Kuliah Baru',
+        onClick: () => window.dispatchEvent(new CustomEvent('beresks:buka-tambah-matkul')),
+      };
+    }
+    return null;
+  };
+
+  const fabAction = getResolvedFabAction();
+
   return (
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column',
+        flexDirection: isDesktop && showShell ? 'row' : 'column',
         minHeight: '100vh',
         backgroundColor: 'var(--md-sys-color-surface)',
         color: 'var(--md-sys-color-on-surface)',
@@ -98,6 +193,10 @@ export function App() {
         <div
           role="status"
           style={{
+            position: 'fixed',
+            top: 0,
+            left: isDesktop && showShell ? 'var(--bs-rail-w, 88px)' : 0,
+            right: 0,
             backgroundColor: 'var(--md-sys-color-surface-container-highest)',
             color: 'var(--md-sys-color-on-surface-variant)',
             padding: '6px 16px',
@@ -116,41 +215,61 @@ export function App() {
         </div>
       )}
 
-      {/* Main Content Viewport */}
-      <main style={{ flex: 1, width: '100%' }}>
-        <Routes>
-          <Route path="/" element={<HariIni />} />
-          <Route path="/jadwal" element={<Jadwal />} />
-          <Route path="/matkul" element={<MataKuliah />} />
-          <Route path="/matkul/:id" element={<DetailMataKuliah />} />
-          <Route path="/tugas" element={<Tugas />} />
-          <Route path="/pengaturan" element={<Pengaturan />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-        </Routes>
-      </main>
-
-      {/* FAB + (Floating Action Button) Cepat */}
-      {showShell && (
-        <div
-          style={{
-            position: 'fixed',
-            bottom: 'calc(90px + min(env(safe-area-inset-bottom, 0px), 14px))',
-            right: '20px',
-            zIndex: 45,
-          }}
-        >
-          <Fab
-            icon="add"
-            variant="primary"
-            size="medium"
-            ariaLabel="Catat Tugas Baru Cepat"
-            onClick={() => openQuickAdd()}
-          />
-        </div>
+      {/* Navigation Rail untuk Tablet/Desktop (>= 840px) */}
+      {showShell && isDesktop && (
+        <NavigationRail
+          items={navItems}
+          activeId={getActiveNavId()}
+          onChange={(id) => navigate(id)}
+          onOpenSettings={() => navigate('/pengaturan')}
+        />
       )}
 
-      {/* Bottom Navigation Bar */}
-      {showShell && (
+      {/* Main Content Viewport */}
+      <main
+        style={{
+          flex: 1,
+          width: '100%',
+          marginLeft: isDesktop && showShell ? 'var(--bs-rail-w, 88px)' : 0,
+          boxSizing: 'border-box',
+          minWidth: 0,
+        }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={shouldReduceMotion ? undefined : { opacity: 0, y: 8 }}
+            animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+            exit={shouldReduceMotion ? undefined : { opacity: 0, y: -8 }}
+            transition={{ duration: 0.16, ease: [0.2, 0, 0, 1] }}
+            style={{ width: '100%', minHeight: '100%' }}
+          >
+            <Routes location={location}>
+              <Route path="/" element={<HariIni />} />
+              <Route path="/jadwal" element={<Jadwal />} />
+              <Route path="/matkul" element={<MataKuliah />} />
+              <Route path="/matkul/:id" element={<DetailMataKuliah />} />
+              <Route path="/tugas" element={<Tugas />} />
+              <Route path="/pengaturan" element={<Pengaturan />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
+      </main>
+
+      {/* Extended Contextual FAB */}
+      {showShell && fabAction && (
+        <ExtendedFab
+          key={`${fabAction.label}-${fabAction.icon}`}
+          icon={fabAction.icon}
+          label={fabAction.label}
+          ariaLabel={fabAction.ariaLabel}
+          onClick={fabAction.onClick}
+        />
+      )}
+
+      {/* Bottom Navigation Bar untuk Layar Ponsel (< 840px) */}
+      {showShell && !isDesktop && (
         <NavigationBar
           items={navItems}
           activeId={getActiveNavId()}

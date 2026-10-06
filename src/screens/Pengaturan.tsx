@@ -7,7 +7,9 @@ import {
   Dialog,
   TextField,
   Icon,
+  SegmentedButton,
   showSnackbar,
+  useRegisterFab,
 } from '../ui/index.js';
 import {
   useDaftarSemester,
@@ -18,6 +20,8 @@ import {
   tambahSemester,
   aktifkanSemester,
   hapusSemester,
+  usePengaturan,
+  simpanPengaturan,
   type Semester,
 } from '../data/repo/index.js';
 import {
@@ -37,6 +41,9 @@ export function Pengaturan() {
   const daftarMatkul = useDaftarMatkul(semesterAktif?.id) || [];
   const daftarSesi = useSemuaSesi() || [];
   const daftarTugas = useDaftarTugas() || [];
+  const pengaturan = usePengaturan();
+
+  useRegisterFab({ hide: true, label: '', icon: '', onClick: () => {} });
 
   // State Dialog Tambah Semester
   const [dialogSemesterOpen, setDialogSemesterOpen] = useState(false);
@@ -170,6 +177,60 @@ export function Pengaturan() {
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        {/* SEKSI TEMA TAMPILAN */}
+        <Card
+          variant="outlined"
+          style={{
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div
+              style={{
+                width: '40px',
+                height: '40px',
+                borderRadius: '12px',
+                backgroundColor: 'var(--md-sys-color-secondary-container)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--md-sys-color-on-secondary-container)',
+                flexShrink: 0,
+              }}
+            >
+              <Icon name="palette" size="22px" />
+            </div>
+            <div>
+              <h2 className="typescale-title-medium" style={{ margin: 0 }}>
+                Tema Tampilan
+              </h2>
+              <p
+                className="typescale-body-small"
+                style={{ margin: 0, color: 'var(--md-sys-color-on-surface-variant)' }}
+              >
+                Pilih mode terang, gelap, atau otomatis mengikuti sistem
+              </p>
+            </div>
+          </div>
+
+          <SegmentedButton
+            segments={[
+              { value: 'sistem', label: 'Sistem', icon: 'devices' },
+              { value: 'terang', label: 'Terang', icon: 'light_mode' },
+              { value: 'gelap', label: 'Gelap', icon: 'dark_mode' },
+            ]}
+            selected={pengaturan.tema || 'sistem'}
+            onChange={(val) => {
+              simpanPengaturan({ tema: val as any });
+              showSnackbar({ message: `Tema diubah ke mode ${val}` });
+            }}
+            style={{ width: '100%', marginTop: '4px' }}
+          />
+        </Card>
+
         {/* SEKSI 1: PASANG APLIKASI (PWA) */}
         {!isStandalone && (
           <Card

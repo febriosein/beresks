@@ -8,6 +8,7 @@ import {
   Icon,
   Select,
   showSnackbar,
+  useRegisterFab,
 } from '../ui/index.js';
 import {
   useDaftarSemester,
@@ -70,6 +71,19 @@ export function MataKuliah() {
     setPilihanSemesterId(targetSemester?.id || null);
     setDialogOpen(true);
   };
+
+  useRegisterFab({
+    label: 'Matkul',
+    icon: 'add',
+    ariaLabel: 'Tambah Mata Kuliah Baru',
+    onClick: bukaDialogTambah,
+  });
+
+  useEffect(() => {
+    const handler = () => bukaDialogTambah();
+    window.addEventListener('beresks:buka-tambah-matkul', handler);
+    return () => window.removeEventListener('beresks:buka-tambah-matkul', handler);
+  }, []);
 
   const simpanMatkul = async () => {
     const namaBersih = nama.trim();
@@ -139,23 +153,6 @@ export function MataKuliah() {
             {targetSemester ? targetSemester.nama : 'Semester Aktif'} · {daftarMatkul.length} mata kuliah
           </p>
         </div>
-
-        <Button
-          variant="filled"
-          icon="add"
-          onClick={bukaDialogTambah}
-          style={{
-            padding: '8px 16px',
-            fontSize: 'var(--md-sys-typescale-label-large-size, 14px)',
-            fontWeight: 700,
-            borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
-            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}
-        >
-          Tambah
-        </Button>
       </div>
 
       {/* Pilihan Semester jika lebih dari 1 */}

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getISODay } from 'date-fns';
 import {
   Card,
@@ -8,6 +8,8 @@ import {
   TextField,
   Select,
   Icon,
+  useRegisterFab,
+  showSnackbar,
 } from '../ui/index.js';
 import {
   useSemesterAktif,
@@ -66,6 +68,31 @@ export function Jadwal() {
     }
     setDialogOpen(true);
   };
+
+  useRegisterFab({
+    label: 'Sesi',
+    icon: 'add',
+    ariaLabel: 'Tambah Sesi Kuliah',
+    onClick: () => {
+      if (daftarMatkul.length === 0) {
+        showSnackbar({ message: 'Tambahkan mata kuliah terlebih dahulu sebelum menambah sesi' });
+        return;
+      }
+      bukaDialog();
+    },
+  });
+
+  useEffect(() => {
+    const handler = () => {
+      if (daftarMatkul.length > 0) {
+        bukaDialog();
+      } else {
+        showSnackbar({ message: 'Tambahkan mata kuliah terlebih dahulu sebelum menambah sesi' });
+      }
+    };
+    window.addEventListener('beresks:buka-tambah-sesi', handler);
+    return () => window.removeEventListener('beresks:buka-tambah-sesi', handler);
+  }, [daftarMatkul]);
 
   const simpanSesi = async () => {
     const matkulIdNum = Number(pilihanMatkulId);
@@ -133,24 +160,6 @@ export function Jadwal() {
             {semesterAktif ? semesterAktif.nama : 'Kuliah'}
           </p>
         </div>
-
-        <Button
-          variant="filled"
-          icon="add"
-          disabled={daftarMatkul.length === 0}
-          onClick={() => bukaDialog()}
-          style={{
-            padding: '8px 16px',
-            fontSize: 'var(--md-sys-typescale-label-large-size, 14px)',
-            fontWeight: 700,
-            borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
-            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-          }}
-        >
-          Tambah Sesi
-        </Button>
       </div>
 
       {/* Switcher Tampilan Hari / Minggu */}

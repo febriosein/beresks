@@ -47,7 +47,7 @@ export interface Tugas {
 
 export interface Pengaturan {
   id: 1;
-  tema: 'sistem';
+  tema: 'sistem' | 'terang' | 'gelap';
   waktuPengingatDefault: string;
   hariAwalMinggu: 1 | 7;
 }

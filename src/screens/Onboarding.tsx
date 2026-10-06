@@ -7,6 +7,7 @@ import {
   Icon,
   Select,
   SegmentedButton,
+  useRegisterFab,
 } from '../ui/index.js';
 import { tambahSemester, tambahMatkul, tambahSesi } from '../data/repo/index.js';
 import { dapatkanWarnaMatkulDefault } from '../lib/warna.js';
@@ -14,6 +15,7 @@ import { format, addMonths } from 'date-fns';
 
 export function Onboarding() {
   const navigate = useNavigate();
+  useRegisterFab({ hide: true, label: '', icon: '', onClick: () => {} });
   const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
 
   // Data Semester

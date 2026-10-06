@@ -1,5 +1,6 @@
 import { Drawer } from 'vaul';
 import type { CSSProperties, ReactNode } from 'react';
+import { useKeyboardInset } from '../lib/useKeyboardInset.js';
 
 interface BottomSheetProps {
   open: boolean;
@@ -7,6 +8,7 @@ interface BottomSheetProps {
   title?: ReactNode;
   description?: string;
   children: ReactNode;
+  footer?: ReactNode;
   snapPoints?: (number | string)[];
   activeSnapPoint?: number | string | null;
   setActiveSnapPoint?: (point: number | string | null) => void;
@@ -19,11 +21,14 @@ export function BottomSheet({
   title,
   description,
   children,
+  footer,
   snapPoints,
   activeSnapPoint,
   setActiveSnapPoint,
   style,
 }: BottomSheetProps) {
+  const keyboardInset = useKeyboardInset();
+
   return (
     <Drawer.Root
       open={open}
@@ -37,7 +42,7 @@ export function BottomSheet({
           style={{
             position: 'fixed',
             inset: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.4)',
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
             zIndex: 100,
             backdropFilter: 'blur(2px)',
           }}
@@ -58,18 +63,19 @@ export function BottomSheet({
             display: 'flex',
             flexDirection: 'column',
             outline: 'none',
-            boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.1)',
+            boxShadow: 'var(--bs-elev-3, 0 -2px 10px rgba(0, 0, 0, 0.1))',
             ...style,
           }}
         >
           {/* M3 Drag Handle */}
           <div
             style={{
-              padding: '16px 0 8px 0',
+              padding: '14px 0 8px 0',
               display: 'flex',
               justifyContent: 'center',
               alignItems: 'center',
               touchAction: 'none',
+              flexShrink: 0,
             }}
           >
             <Drawer.Handle
@@ -90,6 +96,7 @@ export function BottomSheet({
                 fontWeight: 'var(--md-ref-typeface-weight-bold, 700)',
                 padding: '0 20px 12px 20px',
                 margin: 0,
+                flexShrink: 0,
               }}
             >
               {title}
@@ -115,16 +122,39 @@ export function BottomSheet({
             </Drawer.Description>
           )}
 
+          {/* Scrollable Content Body */}
           <div
             style={{
               flex: 1,
               overflowY: 'auto',
-              padding: '0 20px 24px 20px',
-              paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
+              padding: '0 20px 16px 20px',
+              paddingBottom: footer
+                ? '16px'
+                : `calc(24px + var(--bs-safe-bottom, 0px) + ${keyboardInset}px)`,
             }}
           >
             {children}
           </div>
+
+          {/* Sticky Footer (if provided) */}
+          {footer && (
+            <div
+              className="bs-bottom-sheet-footer"
+              style={{
+                flexShrink: 0,
+                padding: '12px 20px',
+                paddingBottom: `calc(12px + var(--bs-safe-bottom, 0px) + ${keyboardInset}px)`,
+                backgroundColor: 'var(--md-sys-color-surface-container-low)',
+                borderTop: '1px solid var(--md-sys-color-outline-variant, rgba(0, 0, 0, 0.08))',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                zIndex: 5,
+              }}
+            >
+              {footer}
+            </div>
+          )}
         </Drawer.Content>
       </Drawer.Portal>
     </Drawer.Root>

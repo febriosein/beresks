@@ -1,4 +1,5 @@
-:root {
+:root,
+:root[data-theme='light'] {
   /* Material Design 3 Dynamic Color Tokens (Source: #1F6F5F) */
   /* Light Theme */
   --md-sys-color-primary: #006b5a;
@@ -39,7 +40,7 @@
   --md-sys-color-surface-container-high: #e6e9e6;
   --md-sys-color-surface-container-highest: #e0e3e0;
 
-  /* Custom KuliahKu Semantic Tokens */
+  /* Custom BereSKS Semantic Tokens */
   --kk-status-terlambat: #BA1A1A;
   --kk-status-terlambat-container: #FFDAD6;
   --kk-status-on-terlambat: #FFFFFF;
@@ -55,17 +56,17 @@
   --kk-status-on-selesai: #FFFFFF;
   --kk-status-on-selesai-container: #00201A;
 
-  /* Matkul Pastel/Distinct Palette (Light) */
-  --kk-matkul-1: #006A60;
-  --kk-matkul-2: #1B6B50;
-  --kk-matkul-3: #2E6A38;
-  --kk-matkul-4: #00677D;
-  --kk-matkul-5: #436815;
-  --kk-matkul-6: #6750A4;
-  --kk-matkul-7: #8C4E61;
-  --kk-matkul-8: #904D00;
-  --kk-matkul-9: #006874;
-  --kk-matkul-10: #556500;
+  /* Matkul Distinct Palette (Light) - 10 distinct hues, contrast >= 4.5:1 against surface */
+  --kk-matkul-1: #B3261E; /* Merah Crimson */
+  --kk-matkul-2: #9A4600; /* Oranye Tembaga */
+  --kk-matkul-3: #7A5900; /* Amber / Kuning Tua */
+  --kk-matkul-4: #1F6F2B; /* Hijau Daun */
+  --kk-matkul-5: #006A6A; /* Teal Dalam */
+  --kk-matkul-6: #0061A4; /* Biru Laut */
+  --kk-matkul-7: #4F46B8; /* Indigo */
+  --kk-matkul-8: #7B3FA0; /* Ungu / Violet */
+  --kk-matkul-9: #A0306B; /* Magenta / Rose */
+  --kk-matkul-10: #5D5F00; /* Zaitun */
 
   /* Shape tokens */
   --md-sys-shape-corner-none: 0px;
@@ -82,9 +83,8 @@
   --md-sys-typescale-body-large-font: 'Plus Jakarta Sans', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* Dark Theme */
+:root[data-theme='dark'] {
+  /* Dark Theme */
   --md-sys-color-primary: #5adbbf;
   --md-sys-color-on-primary: #00382e;
   --md-sys-color-primary-container: #005143;
@@ -115,6 +115,75 @@
   --md-sys-color-inverse-on-surface: #2e3130;
   --md-sys-color-inverse-primary: #006b5a;
 
+  --md-sys-color-surface-dim: #111413;
+  --md-sys-color-surface-bright: #373a39;
+  --md-sys-color-surface-container-lowest: #0c0f0e;
+  --md-sys-color-surface-container-low: #191c1b;
+  --md-sys-color-surface-container: #1d201f;
+  --md-sys-color-surface-container-high: #272b29;
+  --md-sys-color-surface-container-highest: #323634;
+
+  --kk-status-terlambat: #FFB4AB;
+  --kk-status-terlambat-container: #93000A;
+  --kk-status-on-terlambat: #690005;
+  --kk-status-on-terlambat-container: #FFDAD6;
+
+  --kk-status-mendesak: #F9BD38;
+  --kk-status-mendesak-container: #5D4000;
+  --kk-status-on-mendesak: #422D00;
+  --kk-status-on-mendesak-container: #FFDEA5;
+
+  --kk-status-selesai: #8AD6C3;
+  --kk-status-selesai-container: #005144;
+  --kk-status-on-selesai: #00382E;
+  --kk-status-on-selesai-container: #A6F2DF;
+
+  /* Matkul Distinct Palette (Dark) */
+  --kk-matkul-1: #FFB4AB;
+  --kk-matkul-2: #FFB77C;
+  --kk-matkul-3: #F5BE48;
+  --kk-matkul-4: #8AD68E;
+  --kk-matkul-5: #53DBC9;
+  --kk-matkul-6: #9ECAFF;
+  --kk-matkul-7: #BFC2FF;
+  --kk-matkul-8: #E0B6FF;
+  --kk-matkul-9: #FFB0D0;
+  --kk-matkul-10: #C9CC4E;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    /* Dark Theme fallback when data-theme is not explicitly 'light' */
+    --md-sys-color-primary: #5adbbf;
+    --md-sys-color-on-primary: #00382e;
+    --md-sys-color-primary-container: #005143;
+    --md-sys-color-on-primary-container: #7af8db;
+    --md-sys-color-secondary: #b1ccc3;
+    --md-sys-color-on-secondary: #1d352f;
+    --md-sys-color-secondary-container: #334b45;
+    --md-sys-color-on-secondary-container: #cde8df;
+    --md-sys-color-tertiary: #aacbe4;
+    --md-sys-color-on-tertiary: #103447;
+    --md-sys-color-tertiary-container: #2a4a5f;
+    --md-sys-color-on-tertiary-container: #c7e7ff;
+    --md-sys-color-error: #ffb4ab;
+    --md-sys-color-on-error: #690005;
+    --md-sys-color-error-container: #93000a;
+    --md-sys-color-on-error-container: #ffb4ab;
+    --md-sys-color-background: #191c1b;
+    --md-sys-color-on-background: #e1e3e0;
+    --md-sys-color-surface: #191c1b;
+    --md-sys-color-on-surface: #e1e3e0;
+    --md-sys-color-surface-variant: #3f4946;
+    --md-sys-color-on-surface-variant: #bfc9c4;
+    --md-sys-color-outline: #89938f;
+    --md-sys-color-outline-variant: #3f4946;
+    --md-sys-color-shadow: #000000;
+    --md-sys-color-scrim: #000000;
+    --md-sys-color-inverse-surface: #e1e3e0;
+    --md-sys-color-inverse-on-surface: #2e3130;
+    --md-sys-color-inverse-primary: #006b5a;
+
     --md-sys-color-surface-dim: #111413;
     --md-sys-color-surface-bright: #373a39;
     --md-sys-color-surface-container-lowest: #0c0f0e;
@@ -138,16 +207,16 @@
     --kk-status-on-selesai: #00382E;
     --kk-status-on-selesai-container: #A6F2DF;
 
-    /* Matkul Palette (Dark) */
-    --kk-matkul-1: #53DBC9;
-    --kk-matkul-2: #70D7B0;
-    --kk-matkul-3: #85D78E;
-    --kk-matkul-4: #56D6F5;
-    --kk-matkul-5: #A7D46E;
-    --kk-matkul-6: #CFBCFF;
-    --kk-matkul-7: #FFB1C8;
-    --kk-matkul-8: #FFB77C;
-    --kk-matkul-9: #4FD8EB;
-    --kk-matkul-10: #BDCE5E;
+    /* Matkul Distinct Palette (Dark) */
+    --kk-matkul-1: #FFB4AB;
+    --kk-matkul-2: #FFB77C;
+    --kk-matkul-3: #F5BE48;
+    --kk-matkul-4: #8AD68E;
+    --kk-matkul-5: #53DBC9;
+    --kk-matkul-6: #9ECAFF;
+    --kk-matkul-7: #BFC2FF;
+    --kk-matkul-8: #E0B6FF;
+    --kk-matkul-9: #FFB0D0;
+    --kk-matkul-10: #C9CC4E;
   }
 }

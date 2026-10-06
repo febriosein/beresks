@@ -1,4 +1,4 @@
-/* Global CSS - KuliahKu */
+/* Global CSS - BereSKS Design Tokens & System */
 :root {
   --md-icon-font: 'Material Symbols Rounded';
   font-family: var(--md-ref-typeface-plain);
@@ -13,6 +13,38 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  /* BereSKS Spacing Tokens */
+  --bs-space-1: 4px;
+  --bs-space-2: 8px;
+  --bs-space-3: 12px;
+  --bs-space-4: 16px;
+  --bs-space-5: 20px;
+  --bs-space-6: 24px;
+  --bs-space-8: 32px;
+
+  /* BereSKS Safe Area & Shell Tokens */
+  --bs-safe-top: env(safe-area-inset-top, 0px);
+  --bs-safe-bottom: min(env(safe-area-inset-bottom, 0px), 14px);
+  --bs-nav-h: calc(64px + var(--bs-safe-bottom));
+  --bs-fab-bottom: calc(var(--bs-nav-h) + 16px);
+  --bs-screen-pad-bottom: calc(var(--bs-nav-h) + 96px);
+  --bs-rail-w: 88px;
+
+  /* Legacy alias variables */
+  --safe-area-top: var(--bs-safe-top);
+  --safe-area-bottom: var(--bs-safe-bottom);
+
+  /* BereSKS Elevation Tokens */
+  --bs-elev-1: 0 1px 2px rgb(0 0 0 / .08), 0 1px 3px rgb(0 0 0 / .06);
+  --bs-elev-2: 0 2px 6px rgb(0 0 0 / .10), 0 4px 12px rgb(0 0 0 / .06);
+  --bs-elev-3: 0 6px 16px rgb(0 0 0 / .14);
+
+  /* BereSKS Motion Tokens */
+  --bs-ease-emphasized: cubic-bezier(.2, 0, 0, 1);
+  --bs-dur-short: 150ms;
+  --bs-dur-medium: 250ms;
+  --bs-dur-long: 400ms;
 
   /* Typography scale tokens */
   --md-sys-typescale-display-large-size: 3.5625rem;
@@ -72,6 +104,34 @@ body {
   min-height: 100vh;
   min-height: -webkit-fill-available;
   width: 100%;
+}
+
+/* Accessibility & Interaction Resets */
+:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+button, a, [role='button'] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Material Design 3 Typescale Helper Classes */
@@ -145,6 +205,20 @@ body {
   line-height: 1.4;
 }
 
+.typescale-label-medium {
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-medium-size);
+  font-weight: var(--md-ref-typeface-weight-medium);
+  line-height: 1.35;
+}
+
+.typescale-label-small {
+  font-family: var(--md-ref-typeface-plain);
+  font-size: var(--md-sys-typescale-label-small-size);
+  font-weight: var(--md-ref-typeface-weight-medium);
+  line-height: 1.3;
+}
+
 /* Heading Defaults */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--md-ref-typeface-brand);
@@ -193,18 +267,37 @@ md-dialog::part(scrim) {
   background-color: rgba(0, 0, 0, 0.45);
 }
 
-.typescale-label-medium {
-  font-family: var(--md-ref-typeface-plain);
-  font-size: var(--md-sys-typescale-label-medium-size);
-  font-weight: var(--md-ref-typeface-weight-medium);
-  line-height: 1.35;
+/* Card Interactive Layer */
+.m3-card--interactive {
+  cursor: pointer;
+  user-select: none;
+  transition: transform var(--bs-dur-short) var(--bs-ease-emphasized),
+              box-shadow var(--bs-dur-short) var(--bs-ease-emphasized),
+              filter var(--bs-dur-short) ease,
+              background-color var(--bs-dur-short) ease;
 }
 
-.typescale-label-small {
-  font-family: var(--md-ref-typeface-plain);
-  font-size: var(--md-sys-typescale-label-small-size);
-  font-weight: var(--md-ref-typeface-weight-medium);
-  line-height: 1.3;
+.m3-card--interactive:hover {
+  filter: brightness(0.97);
+}
+
+:root[data-theme='dark'] .m3-card--interactive:hover {
+  filter: brightness(1.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .m3-card--interactive:hover {
+    filter: brightness(1.05);
+  }
+}
+
+.m3-card--interactive:active {
+  transform: scale(0.985);
+}
+
+.m3-card:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
 }
 
 /* Material Symbols Icon helper */
@@ -223,15 +316,10 @@ md-dialog::part(scrim) {
 }
 
 /* Safe area insets & Mobile Navigation */
-:root {
-  --safe-area-top: env(safe-area-inset-top, 0px);
-  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-}
-
 .m3-navigation-bar {
-  height: calc(64px + min(env(safe-area-inset-bottom, 0px), 14px));
+  height: var(--bs-nav-h);
   padding-top: 6px;
-  padding-bottom: calc(6px + min(env(safe-area-inset-bottom, 0px), 14px));
+  padding-bottom: calc(6px + var(--bs-safe-bottom));
   bottom: 0;
   box-sizing: border-box;
 }
@@ -248,9 +336,26 @@ md-dialog::part(scrim) {
 }
 
 .safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: var(--bs-safe-bottom);
 }
 
 .safe-top {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: var(--bs-safe-top);
+}
+
+@keyframes bs-skeleton-pulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.6; }
+}
+
+@keyframes snackbar-appear {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 16px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }

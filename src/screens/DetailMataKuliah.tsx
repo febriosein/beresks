@@ -11,6 +11,7 @@ import {
   Select,
   SegmentedButton,
   showSnackbar,
+  useRegisterFab,
 } from '../ui/index.js';
 import {
   useMatkul,
@@ -41,6 +42,13 @@ export function DetailMataKuliah() {
   const daftarTugas = useDaftarTugas(matkulId) || [];
 
   const { openQuickAdd } = useQuickAddStore();
+
+  useRegisterFab({
+    label: 'Tugas',
+    icon: 'add_task',
+    ariaLabel: 'Catat Tugas untuk Mata Kuliah Ini',
+    onClick: () => openQuickAdd(matkulId),
+  });
 
   const [activeTab, setActiveTab] = useState(0);
 

@@ -1,4 +1,5 @@
 import { Icon } from './Icon.js';
+import { haptic } from '../lib/haptic.js';
 import type { CSSProperties } from 'react';
 
 export interface NavigationItem {
@@ -24,17 +25,25 @@ export function NavigationBar({
   className = '',
   style,
 }: NavigationBarProps) {
+  const handleClick = (item: NavigationItem, isActive: boolean) => {
+    if (isActive) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      haptic('selection');
+      onChange(item.id);
+    }
+  };
+
   return (
     <nav
-      role="navigation"
       aria-label="Navigasi Utama"
-      className={`m3-navigation-bar ${className}`}
+      className={`m3-navigation-bar ${className}`.trim()}
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',
         width: '100%',
-        height: 'calc(76px + min(env(safe-area-inset-bottom, 0px), 14px))',
+        height: 'var(--bs-nav-h, calc(64px + min(env(safe-area-inset-bottom, 0px), 14px)))',
         boxSizing: 'border-box',
         backgroundColor: 'var(--md-sys-color-surface-container)',
         borderTop: '1px solid var(--md-sys-color-surface-variant)',
@@ -44,7 +53,7 @@ export function NavigationBar({
         right: 0,
         zIndex: 50,
         paddingTop: '6px',
-        paddingBottom: 'calc(6px + min(env(safe-area-inset-bottom, 0px), 14px))',
+        paddingBottom: 'calc(6px + var(--bs-safe-bottom, 0px))',
         ...style,
       }}
     >
@@ -56,10 +65,10 @@ export function NavigationBar({
           <button
             key={item.id}
             type="button"
-            role="tab"
-            aria-selected={isActive}
+            aria-current={isActive ? 'page' : undefined}
             aria-label={item.label}
-            onClick={() => onChange(item.id)}
+            onClick={() => handleClick(item, isActive)}
+            className="bs-nav-button"
             style={{
               flex: 1,
               height: '100%',
@@ -72,7 +81,6 @@ export function NavigationBar({
               border: 'none',
               cursor: 'pointer',
               padding: '0',
-              outline: 'none',
               position: 'relative',
               WebkitTapHighlightColor: 'transparent',
             }}
@@ -90,7 +98,7 @@ export function NavigationBar({
                 alignItems: 'center',
                 justifyContent: 'center',
                 position: 'relative',
-                transition: 'background-color 200ms ease',
+                transition: 'background-color var(--bs-dur-medium, 200ms) var(--bs-ease-emphasized, ease)',
               }}
             >
               <Icon
@@ -106,10 +114,11 @@ export function NavigationBar({
               {/* Badge */}
               {item.badge !== undefined && item.badge !== 0 && (
                 <span
+                  className="tabular"
                   style={{
                     position: 'absolute',
                     top: '2px',
-                    right: '12px',
+                    right: '10px',
                     backgroundColor: 'var(--md-sys-color-error)',
                     color: 'var(--md-sys-color-on-error)',
                     fontSize: '11px',
@@ -143,7 +152,7 @@ export function NavigationBar({
                 lineHeight: 1.2,
                 whiteSpace: 'nowrap',
                 textAlign: 'center',
-                transition: 'color 200ms ease',
+                transition: 'color var(--bs-dur-medium, 200ms) ease',
               }}
             >
               {item.label}

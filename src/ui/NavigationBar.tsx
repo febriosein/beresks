@@ -34,7 +34,7 @@ export function NavigationBar({
         alignItems: 'center',
         justifyContent: 'space-around',
         width: '100%',
-        height: '68px',
+        height: 'calc(80px + min(env(safe-area-inset-bottom, 0px), 14px))',
         boxSizing: 'border-box',
         backgroundColor: 'var(--md-sys-color-surface-container)',
         borderTop: '1px solid var(--md-sys-color-surface-variant)',
@@ -43,7 +43,8 @@ export function NavigationBar({
         left: 0,
         right: 0,
         zIndex: 50,
-        padding: '6px 0',
+        paddingTop: '6px',
+        paddingBottom: 'calc(6px + min(env(safe-area-inset-bottom, 0px), 14px))',
         ...style,
       }}
     >

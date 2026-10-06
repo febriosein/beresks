@@ -161,6 +161,18 @@ md-elevated-button {
   --md-text-button-label-text-font: var(--md-ref-typeface-brand);
   --md-filled-button-container-shape: 16px;
   --md-outlined-button-container-shape: 16px;
+  --md-filled-button-leading-space: 16px;
+  --md-filled-button-trailing-space: 16px;
+  --md-outlined-button-leading-space: 16px;
+  --md-outlined-button-trailing-space: 16px;
+}
+
+input[type="time"],
+input[type="date"] {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  -webkit-appearance: none;
 }
 
 md-dialog {

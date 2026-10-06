@@ -68,7 +68,7 @@ export function HariIni() {
   const matkulBerikutnya = infoBerikutnya ? daftarMatkul.find((m) => m.id === infoBerikutnya.sesi.matkulId) : null;
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', padding: '16px', paddingBottom: '96px' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', padding: '16px', paddingBottom: '120px' }}>
       {/* Top Header */}
       <div
         style={{

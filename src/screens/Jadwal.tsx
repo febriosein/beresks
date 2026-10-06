@@ -111,7 +111,7 @@ export function Jadwal() {
   };
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', padding: '16px', paddingBottom: '96px' }}>
+    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', padding: '16px', paddingBottom: '120px' }}>
       {/* Header */}
       <div
         style={{
@@ -119,9 +119,10 @@ export function Jadwal() {
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '16px',
+          gap: '12px',
         }}
       >
-        <div>
+        <div style={{ minWidth: 0, flex: 1 }}>
           <h1 className="typescale-headline-small" style={{ margin: 0 }}>
             Jadwal Kuliah
           </h1>
@@ -139,12 +140,13 @@ export function Jadwal() {
           disabled={daftarMatkul.length === 0}
           onClick={() => bukaDialog()}
           style={{
-            padding: '10px 22px',
-            fontSize: 'var(--md-sys-typescale-label-large-size, 15px)',
+            padding: '8px 16px',
+            fontSize: 'var(--md-sys-typescale-label-large-size, 14px)',
             fontWeight: 700,
             borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
             boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
           Tambah Sesi
@@ -480,13 +482,12 @@ export function Jadwal() {
           <div
             style={{
               display: 'flex',
-              justifyContent: 'space-between',
+              gap: '10px',
               alignItems: 'center',
               width: '100%',
-              gap: '12px',
             }}
           >
-            {editSesiId ? (
+            {editSesiId && (
               <Button
                 variant="text"
                 icon="delete"
@@ -494,38 +495,42 @@ export function Jadwal() {
                 style={{
                   color: 'var(--md-sys-color-error)',
                   fontWeight: 700,
+                  minWidth: '44px',
+                  padding: '0 12px',
                 }}
+                ariaLabel="Hapus Sesi"
               >
                 Hapus
               </Button>
-            ) : <div />}
+            )}
 
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <Button
-                variant="text"
-                onClick={() => setDialogOpen(false)}
-                style={{
-                  minWidth: '88px',
-                  fontWeight: 700,
-                  color: 'var(--md-sys-color-on-surface-variant)',
-                }}
-              >
-                Batal
-              </Button>
-              <Button
-                variant="filled"
-                icon="check"
-                onClick={simpanSesi}
-                style={{
-                  padding: '10px 22px',
-                  fontWeight: 700,
-                  borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
-                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
-                }}
-              >
-                Simpan Sesi
-              </Button>
-            </div>
+            <Button
+              variant="outlined"
+              onClick={() => setDialogOpen(false)}
+              style={{
+                flex: 1,
+                minHeight: '44px',
+                fontWeight: 700,
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+              }}
+            >
+              Batal
+            </Button>
+
+            <Button
+              variant="filled"
+              icon="check"
+              onClick={simpanSesi}
+              style={{
+                flex: 1.2,
+                minHeight: '44px',
+                fontWeight: 700,
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+              }}
+            >
+              Simpan Sesi
+            </Button>
           </div>
         }
       >
@@ -562,13 +567,15 @@ export function Jadwal() {
           {/* Section: Waktu Perkuliahan */}
           <div
             style={{
-              padding: '14px 16px',
+              padding: '12px 14px',
               backgroundColor: 'var(--md-sys-color-surface-container)',
               borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
               border: '1px solid var(--md-sys-color-outline-variant)',
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
+              boxSizing: 'border-box',
+              width: '100%',
             }}
           >
             <div
@@ -585,8 +592,8 @@ export function Jadwal() {
               Waktu Perkuliahan
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ minWidth: 0, width: '100%' }}>
                 <label
                   style={{
                     display: 'block',
@@ -605,7 +612,10 @@ export function Jadwal() {
                   onChange={(e) => setJamMulai(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    minWidth: 0,
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                    padding: '10px 8px',
                     borderRadius: 'var(--md-sys-shape-corner-small, 10px)',
                     border: '1px solid var(--md-sys-color-outline)',
                     background: 'var(--md-sys-color-surface)',
@@ -613,11 +623,12 @@ export function Jadwal() {
                     fontFamily: 'var(--md-ref-typeface-plain)',
                     fontSize: 'var(--md-sys-typescale-body-large-size)',
                     fontWeight: 600,
+                    textAlign: 'center',
                   }}
                 />
               </div>
 
-              <div>
+              <div style={{ minWidth: 0, width: '100%' }}>
                 <label
                   style={{
                     display: 'block',
@@ -636,7 +647,10 @@ export function Jadwal() {
                   onChange={(e) => setJamSelesai(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    minWidth: 0,
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                    padding: '10px 8px',
                     borderRadius: 'var(--md-sys-shape-corner-small, 10px)',
                     border: '1px solid var(--md-sys-color-outline)',
                     background: 'var(--md-sys-color-surface)',
@@ -644,6 +658,7 @@ export function Jadwal() {
                     fontFamily: 'var(--md-ref-typeface-plain)',
                     fontSize: 'var(--md-sys-typescale-body-large-size)',
                     fontWeight: 600,
+                    textAlign: 'center',
                   }}
                 />
               </div>

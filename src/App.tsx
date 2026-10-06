@@ -134,7 +134,7 @@ export function App() {
         <div
           style={{
             position: 'fixed',
-            bottom: 'calc(92px + env(safe-area-inset-bottom, 0px))',
+            bottom: 'calc(88px + env(safe-area-inset-bottom, 0px))',
             right: '16px',
             zIndex: 45,
           }}
@@ -142,7 +142,7 @@ export function App() {
           <Fab
             icon="add"
             variant="primary"
-            size="large"
+            size="medium"
             ariaLabel="Catat Tugas Baru Cepat"
             onClick={() => openQuickAdd()}
           />

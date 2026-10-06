@@ -393,16 +393,20 @@ export function Pengaturan() {
           <div
             style={{
               display: 'flex',
-              gap: '12px',
-              justifyContent: 'flex-end',
+              gap: '10px',
               alignItems: 'center',
               width: '100%',
             }}
           >
             <Button
-              variant="text"
+              variant="outlined"
               onClick={() => setDialogSemesterOpen(false)}
-              style={{ minWidth: '88px', fontWeight: 700 }}
+              style={{
+                flex: 1,
+                minHeight: '44px',
+                fontWeight: 700,
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+              }}
             >
               Batal
             </Button>
@@ -412,7 +416,8 @@ export function Pengaturan() {
               disabled={!namaSemester.trim()}
               onClick={handleSimpanSemester}
               style={{
-                padding: '10px 22px',
+                flex: 1.2,
+                minHeight: '44px',
                 fontWeight: 700,
                 borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
                 boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',

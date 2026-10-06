@@ -398,7 +398,7 @@ export function Tugas() {
         margin: '0 auto',
         width: '100%',
         padding: '16px',
-        paddingBottom: '96px',
+        paddingBottom: '120px',
       }}
     >
       {/* Header */}
@@ -408,9 +408,10 @@ export function Tugas() {
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '16px',
+          gap: '12px',
         }}
       >
-        <div>
+        <div style={{ minWidth: 0, flex: 1 }}>
           <h1 className="typescale-headline-small" style={{ margin: 0 }}>
             Daftar Tugas
           </h1>
@@ -428,12 +429,13 @@ export function Tugas() {
           disabled={daftarMatkul.length === 0}
           onClick={() => openQuickAdd(filterMatkulId || undefined)}
           style={{
-            padding: '10px 22px',
-            fontSize: 'var(--md-sys-typescale-label-large-size, 15px)',
+            padding: '8px 16px',
+            fontSize: 'var(--md-sys-typescale-label-large-size, 14px)',
             fontWeight: 700,
             borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
             boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
           Tugas Baru

@@ -641,19 +641,19 @@ export function DetailMataKuliah() {
           <div
             style={{
               display: 'flex',
-              gap: '12px',
-              justifyContent: 'flex-end',
+              gap: '10px',
               alignItems: 'center',
               width: '100%',
             }}
           >
             <Button
-              variant="text"
+              variant="outlined"
               onClick={() => setDialogSesiOpen(false)}
               style={{
-                minWidth: '88px',
+                flex: 1,
+                minHeight: '44px',
                 fontWeight: 700,
-                color: 'var(--md-sys-color-on-surface-variant)',
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
               }}
             >
               Batal
@@ -663,7 +663,8 @@ export function DetailMataKuliah() {
               icon="check"
               onClick={simpanSesi}
               style={{
-                padding: '10px 22px',
+                flex: 1.2,
+                minHeight: '44px',
                 fontWeight: 700,
                 borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
                 boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
@@ -692,13 +693,15 @@ export function DetailMataKuliah() {
 
           <div
             style={{
-              padding: '14px 16px',
+              padding: '12px 14px',
               backgroundColor: 'var(--md-sys-color-surface-container)',
               borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
               border: '1px solid var(--md-sys-color-outline-variant)',
               display: 'flex',
               flexDirection: 'column',
               gap: '12px',
+              boxSizing: 'border-box',
+              width: '100%',
             }}
           >
             <div
@@ -715,8 +718,8 @@ export function DetailMataKuliah() {
               Waktu Perkuliahan
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ minWidth: 0, width: '100%' }}>
                 <label
                   style={{
                     display: 'block',
@@ -735,7 +738,10 @@ export function DetailMataKuliah() {
                   onChange={(e) => setJamMulai(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    minWidth: 0,
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                    padding: '10px 8px',
                     borderRadius: 'var(--md-sys-shape-corner-small, 10px)',
                     border: '1px solid var(--md-sys-color-outline)',
                     background: 'var(--md-sys-color-surface)',
@@ -743,11 +749,12 @@ export function DetailMataKuliah() {
                     fontFamily: 'var(--md-ref-typeface-plain)',
                     fontSize: 'var(--md-sys-typescale-body-large-size)',
                     fontWeight: 600,
+                    textAlign: 'center',
                   }}
                 />
               </div>
 
-              <div>
+              <div style={{ minWidth: 0, width: '100%' }}>
                 <label
                   style={{
                     display: 'block',
@@ -766,7 +773,10 @@ export function DetailMataKuliah() {
                   onChange={(e) => setJamSelesai(e.target.value)}
                   style={{
                     width: '100%',
-                    padding: '12px',
+                    minWidth: 0,
+                    maxWidth: '100%',
+                    boxSizing: 'border-box',
+                    padding: '10px 8px',
                     borderRadius: 'var(--md-sys-shape-corner-small, 10px)',
                     border: '1px solid var(--md-sys-color-outline)',
                     background: 'var(--md-sys-color-surface)',
@@ -774,6 +784,7 @@ export function DetailMataKuliah() {
                     fontFamily: 'var(--md-ref-typeface-plain)',
                     fontSize: 'var(--md-sys-typescale-body-large-size)',
                     fontWeight: 600,
+                    textAlign: 'center',
                   }}
                 />
               </div>
@@ -823,19 +834,19 @@ export function DetailMataKuliah() {
           <div
             style={{
               display: 'flex',
-              gap: '12px',
-              justifyContent: 'flex-end',
+              gap: '10px',
               alignItems: 'center',
               width: '100%',
             }}
           >
             <Button
-              variant="text"
+              variant="outlined"
               onClick={() => setDialogEditMatkulOpen(false)}
               style={{
-                minWidth: '88px',
+                flex: 1,
+                minHeight: '44px',
                 fontWeight: 700,
-                color: 'var(--md-sys-color-on-surface-variant)',
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
               }}
             >
               Batal
@@ -846,7 +857,8 @@ export function DetailMataKuliah() {
               disabled={!editNama.trim()}
               onClick={simpanEditMatkul}
               style={{
-                padding: '10px 22px',
+                flex: 1.2,
+                minHeight: '44px',
                 fontWeight: 700,
                 borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
                 boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
@@ -868,20 +880,24 @@ export function DetailMataKuliah() {
               autoFocus
             />
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <TextField
-                label="Kode Mata Kuliah"
-                value={editKode}
-                onChange={setEditKode}
-                placeholder="IF202"
-              />
-              <TextField
-                label="Beban SKS"
-                value={editSks}
-                onChange={setEditSks}
-                type="number"
-                placeholder="3"
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ minWidth: 0, width: '100%' }}>
+                <TextField
+                  label="Kode Mata Kuliah"
+                  value={editKode}
+                  onChange={setEditKode}
+                  placeholder="IF202"
+                />
+              </div>
+              <div style={{ minWidth: 0, width: '100%' }}>
+                <TextField
+                  label="Beban SKS"
+                  value={editSks}
+                  onChange={setEditSks}
+                  type="number"
+                  placeholder="3"
+                />
+              </div>
             </div>
           </div>
 

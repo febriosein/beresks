@@ -117,7 +117,7 @@ export function MataKuliah() {
   };
 
   return (
-    <div style={{ padding: '16px', maxWidth: '640px', margin: '0 auto', width: '100%', paddingBottom: '96px' }}>
+    <div style={{ padding: '16px', maxWidth: '640px', margin: '0 auto', width: '100%', paddingBottom: '120px' }}>
       {/* Header */}
       <div
         style={{
@@ -125,9 +125,10 @@ export function MataKuliah() {
           justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: '16px',
+          gap: '12px',
         }}
       >
-        <div>
+        <div style={{ minWidth: 0, flex: 1 }}>
           <h1 className="typescale-headline-small" style={{ margin: 0 }}>
             Mata Kuliah
           </h1>
@@ -144,15 +145,16 @@ export function MataKuliah() {
           icon="add"
           onClick={bukaDialogTambah}
           style={{
-            padding: '10px 22px',
-            fontSize: 'var(--md-sys-typescale-label-large-size, 15px)',
+            padding: '8px 16px',
+            fontSize: 'var(--md-sys-typescale-label-large-size, 14px)',
             fontWeight: 700,
             borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
             boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
             whiteSpace: 'nowrap',
+            flexShrink: 0,
           }}
         >
-          Tambah Mata Kuliah
+          Tambah
         </Button>
       </div>
 
@@ -339,19 +341,19 @@ export function MataKuliah() {
           <div
             style={{
               display: 'flex',
-              gap: '12px',
-              justifyContent: 'flex-end',
+              gap: '10px',
               alignItems: 'center',
               width: '100%',
             }}
           >
             <Button
-              variant="text"
+              variant="outlined"
               onClick={() => setDialogOpen(false)}
               style={{
-                minWidth: '88px',
+                flex: 1,
+                minHeight: '44px',
                 fontWeight: 700,
-                color: 'var(--md-sys-color-on-surface-variant)',
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
               }}
             >
               Batal
@@ -361,7 +363,8 @@ export function MataKuliah() {
               icon="check"
               onClick={simpanMatkul}
               style={{
-                padding: '10px 22px',
+                flex: 1.3,
+                minHeight: '44px',
                 fontWeight: 700,
                 borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
                 boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
@@ -395,32 +398,36 @@ export function MataKuliah() {
               }}
             />
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <TextField
-                label="Kode Mata Kuliah"
-                value={kode}
-                onChange={setKode}
-                placeholder="IF202"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    simpanMatkul();
-                  }
-                }}
-              />
-              <TextField
-                label="Beban SKS"
-                value={sks}
-                onChange={setSks}
-                type="number"
-                placeholder="3"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    simpanMatkul();
-                  }
-                }}
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
+              <div style={{ minWidth: 0, width: '100%' }}>
+                <TextField
+                  label="Kode Mata Kuliah"
+                  value={kode}
+                  onChange={setKode}
+                  placeholder="IF202"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      simpanMatkul();
+                    }
+                  }}
+                />
+              </div>
+              <div style={{ minWidth: 0, width: '100%' }}>
+                <TextField
+                  label="Beban SKS"
+                  value={sks}
+                  onChange={setSks}
+                  type="number"
+                  placeholder="3"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      simpanMatkul();
+                    }
+                  }}
+                />
+              </div>
             </div>
           </div>
 

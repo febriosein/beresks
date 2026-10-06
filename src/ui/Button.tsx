@@ -61,10 +61,10 @@ export function Button({
     '--md-filled-button-label-text-size': '15px',
     '--md-outlined-button-label-text-size': '15px',
     '--md-elevated-button-label-text-size': '15px',
-    '--md-filled-button-leading-space': '20px',
-    '--md-filled-button-trailing-space': '20px',
-    '--md-outlined-button-leading-space': '20px',
-    '--md-outlined-button-trailing-space': '20px',
+    '--md-filled-button-leading-space': '16px',
+    '--md-filled-button-trailing-space': '16px',
+    '--md-outlined-button-leading-space': '16px',
+    '--md-outlined-button-trailing-space': '16px',
     ...style,
   };
 

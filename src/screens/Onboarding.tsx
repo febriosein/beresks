@@ -95,20 +95,27 @@ export function Onboarding() {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginTop: '48px', gap: '20px' }}>
             <div
               style={{
-                width: '84px',
-                height: '84px',
+                width: '96px',
+                height: '96px',
                 borderRadius: 'var(--md-sys-shape-corner-extra-large, 28px)',
-                backgroundColor: 'var(--md-sys-color-primary-container)',
+                backgroundColor: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+                overflow: 'hidden',
+                padding: '8px',
               }}
             >
-              <Icon name="school" size="48px" color="var(--md-sys-color-on-primary-container)" />
+              <img
+                src="/logo.png"
+                alt="Logo BereSKS"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
             </div>
 
             <h1 className="typescale-headline-medium" style={{ margin: 0 }}>
-              Selamat Datang di KuliahKu
+              Selamat Datang di BereSKS
             </h1>
 
             <p

@@ -30,10 +30,10 @@ export function hasilkanIcs(params: {
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//KuliahKu//ID',
+    'PRODID:-//BereSKS//ID',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
-    `X-WR-CALNAME:Jadwal & Tugas Kuliah - ${semester.nama}`,
+    `X-WR-CALNAME:BereSKS - ${semester.nama}`,
   ];
 
   const nowStamp = formatIcsDateTime(new Date()) + 'Z';
@@ -64,7 +64,7 @@ export function hasilkanIcs(params: {
 
     lines.push(
       'BEGIN:VEVENT',
-      `UID:sesi-${sesi.id || Math.random()}@kuliahku`,
+      `UID:sesi-${sesi.id || Math.random()}@beresks`,
       `DTSTAMP:${nowStamp}`,
       `SUMMARY:${summary}`,
       location ? `LOCATION:${location}` : '',
@@ -84,10 +84,10 @@ export function hasilkanIcs(params: {
 
     lines.push(
       'BEGIN:VEVENT',
-      `UID:tugas-${tugas.id || Math.random()}@kuliahku`,
+      `UID:tugas-${tugas.id || Math.random()}@beresks`,
       `DTSTAMP:${nowStamp}`,
       `SUMMARY:Tugas: ${tugas.judul} (${matkul?.nama || 'Kuliah'})`,
-      `DESCRIPTION:${tugas.catatan || 'Pengingat tenggat tugas KuliahKu'}`,
+      `DESCRIPTION:${tugas.catatan || 'Pengingat tenggat tugas BereSKS'}`,
       `DTSTART:${formatIcsDateTime(tenggatDate)}`,
       `DTEND:${formatIcsDateTime(tenggatDate)}`,
       'BEGIN:VALARM',
@@ -107,7 +107,7 @@ export function hasilkanIcs(params: {
 /**
  * Trigger download file .ics langsung di browser
  */
-export function unduhFileIcs(isiIcs: string, namaFile = 'jadwal_kuliahku.ics'): void {
+export function unduhFileIcs(isiIcs: string, namaFile = 'jadwal_beresks.ics'): void {
   const blob = new Blob([isiIcs], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');

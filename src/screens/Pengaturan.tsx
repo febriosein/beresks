@@ -184,7 +184,7 @@ export function Pengaturan() {
               <Icon name="install_mobile" size="28px" />
               <div>
                 <h2 className="typescale-title-medium" style={{ margin: 0 }}>
-                  Pasang KuliahKu di Layar Utama
+                  Pasang BereSKS di Layar Utama
                 </h2>
                 <p className="typescale-body-small" style={{ opacity: 0.9 }}>
                   Akses instan seperti aplikasi native dan 100% offline.
@@ -337,7 +337,7 @@ export function Pengaturan() {
           </h2>
           <Card variant="outlined" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <p className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)', margin: 0 }}>
-              Semua data KuliahKu disimpan di IndexedDB perangkatmu. Kamu bisa mengekspornya ke satu berkas JSON atau memulihkannya kapan pun.
+              Semua data BereSKS disimpan di IndexedDB perangkatmu. Kamu bisa mengekspornya ke satu berkas JSON atau memulihkannya kapan pun.
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
@@ -369,12 +369,30 @@ export function Pengaturan() {
           </Card>
         </div>
 
-        {/* SEKSI 5: TENTANG KULIAHKU */}
+        {/* SEKSI 5: TENTANG BERESKS */}
         <div>
-          <Card variant="filled" style={{ padding: '16px', textAlign: 'center' }}>
-            <Icon name="school" size="36px" color="var(--md-sys-color-primary)" />
-            <h3 className="typescale-title-medium" style={{ margin: '8px 0 2px 0' }}>
-              KuliahKu v0.3
+          <Card variant="filled" style={{ padding: '20px 16px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <div
+              style={{
+                width: '56px',
+                height: '56px',
+                borderRadius: '16px',
+                backgroundColor: '#ffffff',
+                padding: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+              }}
+            >
+              <img
+                src="/logo.png"
+                alt="Logo BereSKS"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            </div>
+            <h3 className="typescale-title-medium" style={{ margin: '10px 0 2px 0' }}>
+              BereSKS v0.3
             </h3>
             <p className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)', margin: 0 }}>
               Aplikasi PWA Offline-First · Material Design 3 · Tanpa Akun & Tanpa Iklan

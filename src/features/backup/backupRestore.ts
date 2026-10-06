@@ -34,7 +34,7 @@ export async function buatBackupData(): Promise<BackupPayload> {
   };
 }
 
-export function unduhFileBackup(backup: BackupPayload, namaFile = 'kuliahku_backup.json'): void {
+export function unduhFileBackup(backup: BackupPayload, namaFile = 'beresks_backup.json'): void {
   const str = JSON.stringify(backup, null, 2);
   const blob = new Blob([str], { type: 'application/json' });
   const url = URL.createObjectURL(blob);

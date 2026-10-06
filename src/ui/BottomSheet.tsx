@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from 'react';
 interface BottomSheetProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  title?: string;
+  title?: ReactNode;
   description?: string;
   children: ReactNode;
   snapPoints?: (number | string)[];
@@ -87,7 +87,7 @@ export function BottomSheet({
               style={{
                 fontFamily: 'var(--md-ref-typeface-brand)',
                 fontSize: 'var(--md-sys-typescale-title-large-size)',
-                fontWeight: 'var(--md-ref-typeface-weight-medium)',
+                fontWeight: 'var(--md-ref-typeface-weight-bold, 700)',
                 padding: '0 20px 12px 20px',
                 margin: 0,
               }}

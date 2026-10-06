@@ -44,13 +44,37 @@ export function Button({
     </>
   );
 
+  const mergedStyle: CSSProperties = {
+    fontFamily: 'var(--md-ref-typeface-brand)',
+    fontWeight: 'var(--md-ref-typeface-weight-bold, 700)',
+    // @ts-expect-error - CSS custom properties for Material Web Button
+    '--md-filled-button-label-text-weight': '700',
+    '--md-outlined-button-label-text-weight': '700',
+    '--md-text-button-label-text-weight': '700',
+    '--md-elevated-button-label-text-weight': '700',
+    '--md-filled-button-container-shape': '16px',
+    '--md-outlined-button-container-shape': '16px',
+    '--md-elevated-button-container-shape': '16px',
+    '--md-filled-button-container-height': '44px',
+    '--md-outlined-button-container-height': '44px',
+    '--md-elevated-button-container-height': '44px',
+    '--md-filled-button-label-text-size': '15px',
+    '--md-outlined-button-label-text-size': '15px',
+    '--md-elevated-button-label-text-size': '15px',
+    '--md-filled-button-leading-space': '20px',
+    '--md-filled-button-trailing-space': '20px',
+    '--md-outlined-button-leading-space': '20px',
+    '--md-outlined-button-trailing-space': '20px',
+    ...style,
+  };
+
   const commonProps = {
     disabled,
     onClick,
     onPointerDown,
     onPointerUp,
     class: className,
-    style,
+    style: mergedStyle,
     'aria-label': ariaLabel,
     type,
   };

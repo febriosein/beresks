@@ -52,7 +52,16 @@ export function Icon({
           width="100%"
           height="100%"
           fill="currentColor"
-          style={{ width: '100%', height: '100%', display: 'block' }}
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'block',
+            paintOrder: 'stroke fill',
+            stroke: 'currentColor',
+            strokeWidth: 28,
+            strokeLinecap: 'round',
+            strokeLinejoin: 'round',
+          }}
         >
           <path d={path} />
         </svg>

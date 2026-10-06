@@ -143,8 +143,16 @@ export function MataKuliah() {
           variant="filled"
           icon="add"
           onClick={bukaDialogTambah}
+          style={{
+            padding: '10px 22px',
+            fontSize: 'var(--md-sys-typescale-label-large-size, 15px)',
+            fontWeight: 700,
+            borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+            whiteSpace: 'nowrap',
+          }}
         >
-          Tambah
+          Tambah Mata Kuliah
         </Button>
       </div>
 
@@ -205,7 +213,18 @@ export function MataKuliah() {
           >
             Tambahkan mata kuliah untuk mulai mengatur jadwal dan mencatat tugas.
           </p>
-          <Button variant="filled" icon="add" onClick={bukaDialogTambah}>
+          <Button
+            variant="filled"
+            icon="add"
+            onClick={bukaDialogTambah}
+            style={{
+              padding: '12px 24px',
+              fontSize: 'var(--md-sys-typescale-label-large-size, 15px)',
+              fontWeight: 700,
+              borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.14)',
+            }}
+          >
             Tambah Mata Kuliah
           </Button>
         </Card>
@@ -314,23 +333,130 @@ export function MataKuliah() {
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        headline="Tambah Mata Kuliah"
+        headline="Tambah Mata Kuliah Baru"
         icon="school"
         actions={
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
-            <Button variant="text" onClick={() => setDialogOpen(false)}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Button
+              variant="text"
+              onClick={() => setDialogOpen(false)}
+              style={{
+                minWidth: '88px',
+                fontWeight: 700,
+                color: 'var(--md-sys-color-on-surface-variant)',
+              }}
+            >
               Batal
             </Button>
-            <Button variant="filled" onClick={simpanMatkul}>
-              Simpan
+            <Button
+              variant="filled"
+              icon="check"
+              onClick={simpanMatkul}
+              style={{
+                padding: '10px 22px',
+                fontWeight: 700,
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+              }}
+            >
+              Simpan Mata Kuliah
             </Button>
           </div>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', paddingTop: '4px' }}>
+          {/* Section: Identitas Utama */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <TextField
+              label="Nama Mata Kuliah"
+              value={nama}
+              onChange={(val) => {
+                setNama(val);
+                if (val.trim()) setNamaError('');
+              }}
+              error={Boolean(namaError)}
+              errorText={namaError}
+              placeholder="Misal: Sistem Operasi / Basis Data"
+              required
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  simpanMatkul();
+                }
+              }}
+            />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <TextField
+                label="Kode Mata Kuliah"
+                value={kode}
+                onChange={setKode}
+                placeholder="IF202"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    simpanMatkul();
+                  }
+                }}
+              />
+              <TextField
+                label="Beban SKS"
+                value={sks}
+                onChange={setSks}
+                type="number"
+                placeholder="3"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    simpanMatkul();
+                  }
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Section: Dosen & Ruang */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <TextField
+              label="Dosen Pengampu (Opsional)"
+              value={dosen}
+              onChange={setDosen}
+              placeholder="Nama dosen pengampu"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  simpanMatkul();
+                }
+              }}
+            />
+
+            <TextField
+              label="Ruang Kelas Default (Opsional)"
+              value={ruangDefault}
+              onChange={setRuangDefault}
+              placeholder="Misal: Gedung C R.101"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  simpanMatkul();
+                }
+              }}
+            />
+          </div>
+
+          {/* Section: Semester (jika lebih dari 1) */}
           {daftarSemester.length > 1 && (
             <Select
-              label="Semester"
+              label="Semester Target"
               value={String(pilihanSemesterId || targetSemester?.id || '')}
               onChange={(val) => setPilihanSemesterId(Number(val))}
               options={daftarSemester.map((s) => ({
@@ -340,115 +466,70 @@ export function MataKuliah() {
             />
           )}
 
-          <TextField
-            label="Nama Mata Kuliah"
-            value={nama}
-            onChange={(val) => {
-              setNama(val);
-              if (val.trim()) setNamaError('');
+          {/* Section: Pilihan Warna */}
+          <div
+            style={{
+              padding: '14px 16px',
+              backgroundColor: 'var(--md-sys-color-surface-container)',
+              borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+              border: '1px solid var(--md-sys-color-outline-variant)',
             }}
-            error={Boolean(namaError)}
-            errorText={namaError}
-            placeholder="Misal: Sistem Operasi"
-            required
-            autoFocus
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                simpanMatkul();
-              }
-            }}
-          />
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <TextField
-              label="Kode Mata Kuliah"
-              value={kode}
-              onChange={setKode}
-              placeholder="IF202"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  simpanMatkul();
-                }
-              }}
-            />
-            <TextField
-              label="SKS"
-              value={sks}
-              onChange={setSks}
-              type="number"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  simpanMatkul();
-                }
-              }}
-            />
-          </div>
-
-          <TextField
-            label="Dosen Pengampu"
-            value={dosen}
-            onChange={setDosen}
-            placeholder="Nama Dosen"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                simpanMatkul();
-              }
-            }}
-          />
-
-          <TextField
-            label="Ruang Default"
-            value={ruangDefault}
-            onChange={setRuangDefault}
-            placeholder="Gedung C R.101"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                e.preventDefault();
-                simpanMatkul();
-              }
-            }}
-          />
-
-          {/* Pilihan Warna */}
-          <div>
+          >
             <div
               style={{
                 fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                color: 'var(--md-sys-color-on-surface-variant)',
-                marginBottom: '8px',
+                fontWeight: 700,
+                color: 'var(--md-sys-color-on-surface)',
+                marginBottom: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  backgroundColor: warnaPilihan,
+                }}
+              />
               Warna Label Mata Kuliah
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {DAFTAR_WARNA_MATKUL.map((colorToken) => (
-                <button
-                  key={colorToken}
-                  type="button"
-                  aria-label={`Pilih warna ${colorToken}`}
-                  onClick={() => setWarnaPilihan(colorToken)}
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
-                    backgroundColor: colorToken,
-                    border: warnaPilihan === colorToken ? '3px solid var(--md-sys-color-on-surface)' : '2px solid transparent',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    outline: 'none',
-                  }}
-                >
-                  {warnaPilihan === colorToken && (
-                    <Icon name="check" size="20px" color="var(--md-sys-color-on-primary)" />
-                  )}
-                </button>
-              ))}
+              {DAFTAR_WARNA_MATKUL.map((colorToken) => {
+                const isSelected = warnaPilihan === colorToken;
+                return (
+                  <button
+                    key={colorToken}
+                    type="button"
+                    aria-label={`Pilih warna ${colorToken}`}
+                    onClick={() => setWarnaPilihan(colorToken)}
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
+                      backgroundColor: colorToken,
+                      border: isSelected
+                        ? '3px solid var(--md-sys-color-on-surface)'
+                        : '2px solid transparent',
+                      transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                      boxShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.2)' : 'none',
+                      transition: 'all 150ms ease',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      outline: 'none',
+                    }}
+                  >
+                    {isSelected && (
+                      <Icon name="check" size="20px" color="var(--md-sys-color-on-primary)" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -390,11 +390,34 @@ export function Pengaturan() {
         headline="Tambah Semester Baru"
         icon="school"
         actions={
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
-            <Button variant="text" onClick={() => setDialogSemesterOpen(false)}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Button
+              variant="text"
+              onClick={() => setDialogSemesterOpen(false)}
+              style={{ minWidth: '88px', fontWeight: 700 }}
+            >
               Batal
             </Button>
-            <Button variant="filled" disabled={!namaSemester.trim()} onClick={handleSimpanSemester}>
+            <Button
+              variant="filled"
+              icon="check"
+              disabled={!namaSemester.trim()}
+              onClick={handleSimpanSemester}
+              style={{
+                padding: '10px 22px',
+                fontWeight: 700,
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+              }}
+            >
               Simpan & Aktifkan
             </Button>
           </div>

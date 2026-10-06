@@ -473,9 +473,16 @@ export function DetailMataKuliah() {
               variant="filled"
               icon="add"
               onClick={() => bukaDialogSesi()}
-              style={{ width: '100%' }}
+              style={{
+                width: '100%',
+                padding: '12px 22px',
+                fontSize: 'var(--md-sys-typescale-label-large-size, 15px)',
+                fontWeight: 700,
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+              }}
             >
-              + Tambah Sesi Kelas
+              Tambah Sesi Kelas
             </Button>
 
             {daftarSesi.length === 0 ? (
@@ -631,17 +638,43 @@ export function DetailMataKuliah() {
         headline={editSesiId ? 'Ubah Sesi Pertemuan' : 'Tambah Sesi Pertemuan'}
         icon="schedule"
         actions={
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
-            <Button variant="text" onClick={() => setDialogSesiOpen(false)}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Button
+              variant="text"
+              onClick={() => setDialogSesiOpen(false)}
+              style={{
+                minWidth: '88px',
+                fontWeight: 700,
+                color: 'var(--md-sys-color-on-surface-variant)',
+              }}
+            >
               Batal
             </Button>
-            <Button variant="filled" onClick={simpanSesi}>
-              Simpan
+            <Button
+              variant="filled"
+              icon="check"
+              onClick={simpanSesi}
+              style={{
+                padding: '10px 22px',
+                fontWeight: 700,
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+              }}
+            >
+              Simpan Sesi
             </Button>
           </div>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '8px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '4px' }}>
           <Select
             label="Hari Pertemuan"
             value={String(hariSesi)}
@@ -657,92 +690,125 @@ export function DetailMataKuliah() {
             ]}
           />
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                  color: 'var(--md-sys-color-on-surface-variant)',
-                  marginBottom: '6px',
-                }}
-              >
-                Jam Mulai
-              </label>
-              <input
-                type="time"
-                aria-label="Jam Mulai"
-                value={jamMulai}
-                onChange={(e) => setJamMulai(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                  border: '1px solid var(--md-sys-color-outline)',
-                  background: 'var(--md-sys-color-surface)',
-                  color: 'var(--md-sys-color-on-surface)',
-                  fontFamily: 'var(--md-ref-typeface-plain)',
-                  fontSize: 'var(--md-sys-typescale-body-large-size)',
-                }}
-              />
+          <div
+            style={{
+              padding: '14px 16px',
+              backgroundColor: 'var(--md-sys-color-surface-container)',
+              borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+              border: '1px solid var(--md-sys-color-outline-variant)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 'var(--md-sys-typescale-label-medium-size)',
+                fontWeight: 700,
+                color: 'var(--md-sys-color-on-surface)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <Icon name="schedule" size="18px" color="var(--md-sys-color-primary)" />
+              Waktu Perkuliahan
             </div>
 
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                  color: 'var(--md-sys-color-on-surface-variant)',
-                  marginBottom: '6px',
-                }}
-              >
-                Jam Selesai
-              </label>
-              <input
-                type="time"
-                aria-label="Jam Selesai"
-                value={jamSelesai}
-                onChange={(e) => setJamSelesai(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                  border: '1px solid var(--md-sys-color-outline)',
-                  background: 'var(--md-sys-color-surface)',
-                  color: 'var(--md-sys-color-on-surface)',
-                  fontFamily: 'var(--md-ref-typeface-plain)',
-                  fontSize: 'var(--md-sys-typescale-body-large-size)',
-                }}
-              />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 'var(--md-sys-typescale-label-small-size)',
+                    fontWeight: 700,
+                    color: 'var(--md-sys-color-on-surface-variant)',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Jam Mulai
+                </label>
+                <input
+                  type="time"
+                  aria-label="Jam Mulai"
+                  value={jamMulai}
+                  onChange={(e) => setJamMulai(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: 'var(--md-sys-shape-corner-small, 10px)',
+                    border: '1px solid var(--md-sys-color-outline)',
+                    background: 'var(--md-sys-color-surface)',
+                    color: 'var(--md-sys-color-on-surface)',
+                    fontFamily: 'var(--md-ref-typeface-plain)',
+                    fontSize: 'var(--md-sys-typescale-body-large-size)',
+                    fontWeight: 600,
+                  }}
+                />
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 'var(--md-sys-typescale-label-small-size)',
+                    fontWeight: 700,
+                    color: 'var(--md-sys-color-on-surface-variant)',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Jam Selesai
+                </label>
+                <input
+                  type="time"
+                  aria-label="Jam Selesai"
+                  value={jamSelesai}
+                  onChange={(e) => setJamSelesai(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: 'var(--md-sys-shape-corner-small, 10px)',
+                    border: '1px solid var(--md-sys-color-outline)',
+                    background: 'var(--md-sys-color-surface)',
+                    color: 'var(--md-sys-color-on-surface)',
+                    fontFamily: 'var(--md-ref-typeface-plain)',
+                    fontSize: 'var(--md-sys-typescale-body-large-size)',
+                    fontWeight: 600,
+                  }}
+                />
+              </div>
             </div>
           </div>
 
-          <TextField
-            label="Ruangan (Opsional)"
-            value={ruangSesi}
-            onChange={setRuangSesi}
-            placeholder="R.302"
-          />
-
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                color: 'var(--md-sys-color-on-surface-variant)',
-                marginBottom: '8px',
-              }}
-            >
-              Tipe Sesi
-            </label>
-            <SegmentedButton
-              selected={tipeSesi}
-              onChange={(val) => setTipeSesi(val as any)}
-              segments={[
-                { value: 'teori', label: 'Teori' },
-                { value: 'praktikum', label: 'Praktikum' },
-              ]}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <TextField
+              label="Ruangan (Opsional)"
+              value={ruangSesi}
+              onChange={setRuangSesi}
+              placeholder="R.302"
             />
+
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--md-sys-typescale-label-medium-size)',
+                  fontWeight: 700,
+                  color: 'var(--md-sys-color-on-surface)',
+                  marginBottom: '8px',
+                }}
+              >
+                Tipe Sesi Perkuliahan
+              </label>
+              <SegmentedButton
+                selected={tipeSesi}
+                onChange={(val) => setTipeSesi(val as any)}
+                segments={[
+                  { value: 'teori', label: 'Teori' },
+                  { value: 'praktikum', label: 'Praktikum' },
+                ]}
+              />
+            </div>
           </div>
         </div>
       </Dialog>
@@ -754,94 +820,160 @@ export function DetailMataKuliah() {
         headline="Ubah Data Mata Kuliah"
         icon="edit"
         actions={
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
-            <Button variant="text" onClick={() => setDialogEditMatkulOpen(false)}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Button
+              variant="text"
+              onClick={() => setDialogEditMatkulOpen(false)}
+              style={{
+                minWidth: '88px',
+                fontWeight: 700,
+                color: 'var(--md-sys-color-on-surface-variant)',
+              }}
+            >
               Batal
             </Button>
-            <Button variant="filled" disabled={!editNama.trim()} onClick={simpanEditMatkul}>
-              Simpan
+            <Button
+              variant="filled"
+              icon="check"
+              disabled={!editNama.trim()}
+              onClick={simpanEditMatkul}
+              style={{
+                padding: '10px 22px',
+                fontWeight: 700,
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+              }}
+            >
+              Simpan Perubahan
             </Button>
           </div>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '8px' }}>
-          <TextField
-            label="Nama Mata Kuliah"
-            value={editNama}
-            onChange={setEditNama}
-            required
-            autoFocus
-          />
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingTop: '4px' }}>
+          {/* Section: Identitas Utama */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <TextField
-              label="Kode"
-              value={editKode}
-              onChange={setEditKode}
+              label="Nama Mata Kuliah"
+              value={editNama}
+              onChange={setEditNama}
+              required
+              autoFocus
             />
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <TextField
+                label="Kode Mata Kuliah"
+                value={editKode}
+                onChange={setEditKode}
+                placeholder="IF202"
+              />
+              <TextField
+                label="Beban SKS"
+                value={editSks}
+                onChange={setEditSks}
+                type="number"
+                placeholder="3"
+              />
+            </div>
+          </div>
+
+          {/* Section: Dosen & Ruang & Catatan */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <TextField
-              label="SKS"
-              value={editSks}
-              onChange={setEditSks}
-              type="number"
+              label="Dosen Pengampu"
+              value={editDosen}
+              onChange={setEditDosen}
+              placeholder="Nama Dosen"
+            />
+
+            <TextField
+              label="Ruang Kelas Default"
+              value={editRuangDefault}
+              onChange={setEditRuangDefault}
+              placeholder="Gedung C R.101"
+            />
+
+            <TextField
+              label="Catatan Tambahan (Opsional)"
+              value={editCatatan}
+              onChange={setEditCatatan}
+              placeholder="Keterangan kontrak kuliah, link materi, dll."
+              rows={2}
             />
           </div>
 
-          <TextField
-            label="Dosen Pengampu"
-            value={editDosen}
-            onChange={setEditDosen}
-          />
-
-          <TextField
-            label="Ruang Default"
-            value={editRuangDefault}
-            onChange={setEditRuangDefault}
-          />
-
-          <TextField
-            label="Catatan"
-            value={editCatatan}
-            onChange={setEditCatatan}
-            rows={2}
-          />
-
-          {/* Palet Warna */}
-          <div>
+          {/* Section: Palet Warna */}
+          <div
+            style={{
+              padding: '14px 16px',
+              backgroundColor: 'var(--md-sys-color-surface-container)',
+              borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+              border: '1px solid var(--md-sys-color-outline-variant)',
+            }}
+          >
             <div
               style={{
                 fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                color: 'var(--md-sys-color-on-surface-variant)',
-                marginBottom: '8px',
+                fontWeight: 700,
+                color: 'var(--md-sys-color-on-surface)',
+                marginBottom: '10px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: '12px',
+                  height: '12px',
+                  borderRadius: '50%',
+                  backgroundColor: editWarna,
+                }}
+              />
               Warna Label Mata Kuliah
             </div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-              {DAFTAR_WARNA_MATKUL.map((colorToken) => (
-                <button
-                  key={colorToken}
-                  type="button"
-                  aria-label={`Pilih warna ${colorToken}`}
-                  onClick={() => setEditWarna(colorToken)}
-                  style={{
-                    width: '36px',
-                    height: '36px',
-                    borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
-                    backgroundColor: colorToken,
-                    border: editWarna === colorToken ? '3px solid var(--md-sys-color-on-surface)' : '2px solid transparent',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    outline: 'none',
-                  }}
-                >
-                  {editWarna === colorToken && (
-                    <Icon name="check" size="20px" color="var(--md-sys-color-on-primary)" />
-                  )}
-                </button>
-              ))}
+              {DAFTAR_WARNA_MATKUL.map((colorToken) => {
+                const isSelected = editWarna === colorToken;
+                return (
+                  <button
+                    key={colorToken}
+                    type="button"
+                    aria-label={`Pilih warna ${colorToken}`}
+                    onClick={() => setEditWarna(colorToken)}
+                    style={{
+                      width: '38px',
+                      height: '38px',
+                      borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
+                      backgroundColor: colorToken,
+                      border: isSelected
+                        ? '3px solid var(--md-sys-color-on-surface)'
+                        : '2px solid transparent',
+                      transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                      boxShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.2)' : 'none',
+                      transition: 'all 150ms ease',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      outline: 'none',
+                    }}
+                  >
+                    {isSelected && (
+                      <Icon name="check" size="20px" color="var(--md-sys-color-on-primary)" />
+                    )}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -854,16 +986,35 @@ export function DetailMataKuliah() {
         headline="Hapus Mata Kuliah?"
         icon="warning"
         actions={
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', width: '100%' }}>
-            <Button variant="text" onClick={() => setDialogHapusOpen(false)}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              width: '100%',
+            }}
+          >
+            <Button
+              variant="text"
+              onClick={() => setDialogHapusOpen(false)}
+              style={{ minWidth: '88px', fontWeight: 700 }}
+            >
               Batal
             </Button>
             <Button
               variant="filled"
+              icon="delete"
               onClick={konfirmasiHapusMatkul}
-              style={{ backgroundColor: 'var(--md-sys-color-error)', color: 'var(--md-sys-color-on-error)' }}
+              style={{
+                backgroundColor: 'var(--md-sys-color-error)',
+                color: 'var(--md-sys-color-on-error)',
+                padding: '10px 22px',
+                fontWeight: 700,
+                borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+              }}
             >
-              Hapus
+              Hapus Permanen
             </Button>
           </div>
         }

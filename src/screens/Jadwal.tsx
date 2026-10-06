@@ -3,7 +3,6 @@ import { getISODay } from 'date-fns';
 import {
   Card,
   Button,
-  IconButton,
   SegmentedButton,
   Dialog,
   TextField,
@@ -139,6 +138,14 @@ export function Jadwal() {
           icon="add"
           disabled={daftarMatkul.length === 0}
           onClick={() => bukaDialog()}
+          style={{
+            padding: '10px 22px',
+            fontSize: 'var(--md-sys-typescale-label-large-size, 15px)',
+            fontWeight: 700,
+            borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+            whiteSpace: 'nowrap',
+          }}
         >
           Tambah Sesi
         </Button>
@@ -255,9 +262,23 @@ export function Jadwal() {
               <p className="typescale-title-medium" style={{ margin: '12px 0 4px 0' }}>
                 Tidak ada kelas hari {getNamaHari(hariTerpilih)} 🎉
               </p>
-              <p className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+              <p className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)', marginBottom: '14px' }}>
                 Nikmati waktu luangmu atau cicil tugas yang ada.
               </p>
+              <Button
+                variant="outlined"
+                icon="add"
+                onClick={() => {
+                  setHariInput(hariTerpilih);
+                  bukaDialog();
+                }}
+                style={{
+                  fontWeight: 700,
+                  borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+                }}
+              >
+                Tambah Sesi Hari Ini
+              </Button>
             </Card>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -453,141 +474,250 @@ export function Jadwal() {
       <Dialog
         open={dialogOpen}
         onClose={() => setDialogOpen(false)}
-        headline={editSesiId ? 'Ubah Sesi Jadwal' : 'Tambah Sesi Jadwal'}
+        headline={editSesiId ? 'Ubah Sesi Jadwal' : 'Tambah Sesi Jadwal Baru'}
         icon="schedule"
         actions={
-          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              gap: '12px',
+            }}
+          >
             {editSesiId ? (
-              <IconButton
+              <Button
+                variant="text"
                 icon="delete"
-                ariaLabel="Hapus Sesi"
                 onClick={handleHapusSesi}
-              />
+                style={{
+                  color: 'var(--md-sys-color-error)',
+                  fontWeight: 700,
+                }}
+              >
+                Hapus
+              </Button>
             ) : <div />}
 
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <Button variant="text" onClick={() => setDialogOpen(false)}>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <Button
+                variant="text"
+                onClick={() => setDialogOpen(false)}
+                style={{
+                  minWidth: '88px',
+                  fontWeight: 700,
+                  color: 'var(--md-sys-color-on-surface-variant)',
+                }}
+              >
                 Batal
               </Button>
-              <Button variant="filled" onClick={simpanSesi}>
-                Simpan
+              <Button
+                variant="filled"
+                icon="check"
+                onClick={simpanSesi}
+                style={{
+                  padding: '10px 22px',
+                  fontWeight: 700,
+                  borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+                  boxShadow: '0 2px 6px rgba(0, 0, 0, 0.12)',
+                }}
+              >
+                Simpan Sesi
               </Button>
             </div>
           </div>
         }
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', paddingTop: '8px' }}>
-          <Select
-            label="Mata Kuliah"
-            value={pilihanMatkulId}
-            onChange={setPilihanMatkulId}
-            options={daftarMatkul.map((m) => ({
-              value: String(m.id),
-              label: m.nama,
-            }))}
-          />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', paddingTop: '4px' }}>
+          {/* Section: Mata Kuliah & Hari */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <Select
+              label="Mata Kuliah"
+              value={pilihanMatkulId}
+              onChange={setPilihanMatkulId}
+              options={daftarMatkul.map((m) => ({
+                value: String(m.id),
+                label: m.nama,
+                supportingText: m.kode ? `${m.kode} · ${m.sks} SKS` : undefined,
+              }))}
+            />
 
-          <Select
-            label="Hari Pertemuan"
-            value={String(hariInput)}
-            onChange={(v) => setHariInput(Number(v) as any)}
-            options={[
-              { value: '1', label: 'Senin' },
-              { value: '2', label: 'Selasa' },
-              { value: '3', label: 'Rabu' },
-              { value: '4', label: 'Kamis' },
-              { value: '5', label: 'Jumat' },
-              { value: '6', label: 'Sabtu' },
-              { value: '7', label: 'Minggu' },
-            ]}
-          />
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                  color: 'var(--md-sys-color-on-surface-variant)',
-                  marginBottom: '6px',
-                }}
-              >
-                Jam Mulai
-              </label>
-              <input
-                type="time"
-                aria-label="Jam Mulai"
-                value={jamMulai}
-                onChange={(e) => setJamMulai(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                  border: '1px solid var(--md-sys-color-outline)',
-                  background: 'var(--md-sys-color-surface)',
-                  color: 'var(--md-sys-color-on-surface)',
-                  fontFamily: 'var(--md-ref-typeface-plain)',
-                  fontSize: 'var(--md-sys-typescale-body-large-size)',
-                }}
-              />
-            </div>
-
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                  color: 'var(--md-sys-color-on-surface-variant)',
-                  marginBottom: '6px',
-                }}
-              >
-                Jam Selesai
-              </label>
-              <input
-                type="time"
-                aria-label="Jam Selesai"
-                value={jamSelesai}
-                onChange={(e) => setJamSelesai(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                  border: '1px solid var(--md-sys-color-outline)',
-                  background: 'var(--md-sys-color-surface)',
-                  color: 'var(--md-sys-color-on-surface)',
-                  fontFamily: 'var(--md-ref-typeface-plain)',
-                  fontSize: 'var(--md-sys-typescale-body-large-size)',
-                }}
-              />
-            </div>
-          </div>
-
-          <TextField
-            label="Ruangan (Opsional)"
-            value={ruang}
-            onChange={setRuang}
-            placeholder="R.302"
-          />
-
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                color: 'var(--md-sys-color-on-surface-variant)',
-                marginBottom: '8px',
-              }}
-            >
-              Tipe Sesi
-            </label>
-            <SegmentedButton
-              selected={tipe}
-              onChange={(val) => setTipe(val as any)}
-              segments={[
-                { value: 'teori', label: 'Teori' },
-                { value: 'praktikum', label: 'Praktikum' },
+            <Select
+              label="Hari Pertemuan"
+              value={String(hariInput)}
+              onChange={(v) => setHariInput(Number(v) as any)}
+              options={[
+                { value: '1', label: 'Senin' },
+                { value: '2', label: 'Selasa' },
+                { value: '3', label: 'Rabu' },
+                { value: '4', label: 'Kamis' },
+                { value: '5', label: 'Jumat' },
+                { value: '6', label: 'Sabtu' },
+                { value: '7', label: 'Minggu' },
               ]}
             />
+          </div>
+
+          {/* Section: Waktu Perkuliahan */}
+          <div
+            style={{
+              padding: '14px 16px',
+              backgroundColor: 'var(--md-sys-color-surface-container)',
+              borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
+              border: '1px solid var(--md-sys-color-outline-variant)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px',
+            }}
+          >
+            <div
+              style={{
+                fontSize: 'var(--md-sys-typescale-label-medium-size)',
+                fontWeight: 700,
+                color: 'var(--md-sys-color-on-surface)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}
+            >
+              <Icon name="schedule" size="18px" color="var(--md-sys-color-primary)" />
+              Waktu Perkuliahan
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 'var(--md-sys-typescale-label-small-size)',
+                    fontWeight: 700,
+                    color: 'var(--md-sys-color-on-surface-variant)',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Jam Mulai
+                </label>
+                <input
+                  type="time"
+                  aria-label="Jam Mulai"
+                  value={jamMulai}
+                  onChange={(e) => setJamMulai(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: 'var(--md-sys-shape-corner-small, 10px)',
+                    border: '1px solid var(--md-sys-color-outline)',
+                    background: 'var(--md-sys-color-surface)',
+                    color: 'var(--md-sys-color-on-surface)',
+                    fontFamily: 'var(--md-ref-typeface-plain)',
+                    fontSize: 'var(--md-sys-typescale-body-large-size)',
+                    fontWeight: 600,
+                  }}
+                />
+              </div>
+
+              <div>
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: 'var(--md-sys-typescale-label-small-size)',
+                    fontWeight: 700,
+                    color: 'var(--md-sys-color-on-surface-variant)',
+                    marginBottom: '6px',
+                  }}
+                >
+                  Jam Selesai
+                </label>
+                <input
+                  type="time"
+                  aria-label="Jam Selesai"
+                  value={jamSelesai}
+                  onChange={(e) => setJamSelesai(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    borderRadius: 'var(--md-sys-shape-corner-small, 10px)',
+                    border: '1px solid var(--md-sys-color-outline)',
+                    background: 'var(--md-sys-color-surface)',
+                    color: 'var(--md-sys-color-on-surface)',
+                    fontFamily: 'var(--md-ref-typeface-plain)',
+                    fontSize: 'var(--md-sys-typescale-body-large-size)',
+                    fontWeight: 600,
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Peringatan Bentrok Real-time */}
+            {(() => {
+              const mulaiA = parseWaktuKeMenit(jamMulai);
+              const selesaiA = parseWaktuKeMenit(jamSelesai);
+              if (mulaiA >= selesaiA) return null;
+
+              const sesiBentrok = daftarSesi.find((s) => {
+                if (editSesiId && s.id === editSesiId) return false;
+                if (s.hari !== Number(hariInput)) return false;
+                const mulaiB = parseWaktuKeMenit(s.jamMulai);
+                const selesaiB = parseWaktuKeMenit(s.jamSelesai);
+                return Math.max(mulaiA, mulaiB) < Math.min(selesaiA, selesaiB);
+              });
+              if (!sesiBentrok) return null;
+              const matkulBentrok = daftarMatkul.find((m) => m.id === sesiBentrok.matkulId);
+
+              return (
+                <div
+                  style={{
+                    backgroundColor: 'var(--kk-status-mendesak-container)',
+                    color: 'var(--kk-status-on-mendesak-container)',
+                    padding: '8px 12px',
+                    borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontSize: 'var(--md-sys-typescale-label-small-size)',
+                    fontWeight: 600,
+                  }}
+                >
+                  <Icon name="warning" size="18px" />
+                  <span>
+                    Bentrok dengan {matkulBentrok?.nama || 'sesi lain'} ({sesiBentrok.jamMulai} - {sesiBentrok.jamSelesai})
+                  </span>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Section: Lokasi & Tipe Sesi */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <TextField
+              label="Ruangan (Opsional)"
+              value={ruang}
+              onChange={setRuang}
+              placeholder="Misal: Lab Komputer 2 / Gedung A R.302"
+            />
+
+            <div>
+              <label
+                style={{
+                  display: 'block',
+                  fontSize: 'var(--md-sys-typescale-label-medium-size)',
+                  fontWeight: 700,
+                  color: 'var(--md-sys-color-on-surface)',
+                  marginBottom: '8px',
+                }}
+              >
+                Tipe Sesi Perkuliahan
+              </label>
+              <SegmentedButton
+                selected={tipe}
+                onChange={(val) => setTipe(val as any)}
+                segments={[
+                  { value: 'teori', label: 'Teori' },
+                  { value: 'praktikum', label: 'Praktikum' },
+                ]}
+              />
+            </div>
           </div>
         </div>
       </Dialog>

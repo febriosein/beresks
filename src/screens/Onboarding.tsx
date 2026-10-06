@@ -9,9 +9,11 @@ import {
   SegmentedButton,
   useRegisterFab,
 } from '../ui/index.js';
+import { DateField, TimeField } from '../ui/layout/index.js';
 import { tambahSemester, tambahMatkul, tambahSesi } from '../data/repo/index.js';
 import { dapatkanWarnaMatkulDefault } from '../lib/warna.js';
 import { format, addMonths } from 'date-fns';
+import { haptic } from '../lib/haptic.js';
 
 export function Onboarding() {
   const navigate = useNavigate();
@@ -40,6 +42,7 @@ export function Onboarding() {
 
   // Selesai Onboarding
   const handleSelesai = async () => {
+    haptic('success');
     // 1. Simpan Semester
     const mulaiMs = new Date(tglMulai).getTime();
     const selesaiMs = new Date(tglSelesai).getTime();
@@ -77,6 +80,11 @@ export function Onboarding() {
     navigate('/');
   };
 
+  const gantiStep = (next: 0 | 1 | 2 | 3) => {
+    haptic('light');
+    setStep(next);
+  };
+
   return (
     <div
       style={{
@@ -85,16 +93,90 @@ export function Onboarding() {
         minHeight: '100dvh',
         backgroundColor: 'var(--md-sys-color-surface)',
         color: 'var(--md-sys-color-on-surface)',
-        padding: 'calc(24px + env(safe-area-inset-top, 0px)) 16px calc(24px + env(safe-area-inset-bottom, 0px)) 16px',
         maxWidth: '560px',
         margin: '0 auto',
         justifyContent: 'space-between',
+        boxSizing: 'border-box',
       }}
     >
-      <div>
+      {/* Top Header & Progress */}
+      <div
+        style={{
+          padding: 'calc(16px + env(safe-area-inset-top, 0px)) 20px 0 20px',
+        }}
+      >
+        {step > 0 && (
+          <div style={{ marginBottom: '16px' }}>
+            {/* Step Progress Dots */}
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {[1, 2, 3].map((s) => {
+                const isActive = step === s;
+                const isPassed = step > s;
+                return (
+                  <div
+                    key={s}
+                    style={{
+                      flex: 1,
+                      height: '4px',
+                      borderRadius: '9999px',
+                      backgroundColor: isPassed
+                        ? 'var(--md-sys-color-primary)'
+                        : isActive
+                        ? 'var(--md-sys-color-primary)'
+                        : 'var(--md-sys-color-surface-container-highest)',
+                      transition: 'background-color 200ms ease',
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginTop: '6px',
+                color: 'var(--md-sys-color-on-surface-variant)',
+                fontSize: 'var(--md-sys-typescale-label-small-size)',
+                fontWeight: 600,
+              }}
+            >
+              <span>Langkah {step} dari 3</span>
+              {step >= 2 && (
+                <button
+                  type="button"
+                  onClick={handleSelesai}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    padding: 0,
+                    color: 'var(--md-sys-color-primary)',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: 'var(--md-sys-typescale-label-small-size)',
+                  }}
+                >
+                  Lewati langkah ini
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Main Body */}
+      <div style={{ padding: '0 20px', flex: 1 }}>
         {/* Step 0: Sambutan */}
         {step === 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', marginTop: '48px', gap: '20px' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              textAlign: 'center',
+              marginTop: '32px',
+              gap: '20px',
+            }}
+          >
             <div
               style={{
                 width: '96px',
@@ -116,26 +198,26 @@ export function Onboarding() {
               />
             </div>
 
-            <h1 className="typescale-headline-medium" style={{ margin: 0 }}>
+            <h1 className="typescale-headline-medium" style={{ margin: 0, fontWeight: 800 }}>
               Selamat Datang di BereSKS
             </h1>
 
             <p
               className="typescale-body-large"
-              style={{ color: 'var(--md-sys-color-on-surface-variant)', maxWidth: '400px' }}
+              style={{ color: 'var(--md-sys-color-on-surface-variant)', maxWidth: '420px', margin: 0 }}
             >
-              Aplikasi jadwal kuliah dan pencatat tugas offline-first. Cepat, tenang, tanpa akun, semua data aman di perangkatmu.
+              Jadwal kuliah & pencatat tugas mahasiswa yang tenang, cepat, dan 100% offline-first.
             </p>
 
-            <Card variant="filled" style={{ width: '100%', marginTop: '24px', textAlign: 'left' }}>
+            <Card variant="filled" style={{ width: '100%', marginTop: '16px', textAlign: 'left', padding: '16px 20px' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <Icon name="bolt" color="var(--md-sys-color-primary)" />
-                  <span className="typescale-body-medium">Catat tugas baru dalam ≤ 5 detik & ≤ 3 ketukan</span>
+                  <span className="typescale-body-medium">Catat tugas baru kilat dalam ≤ 5 detik</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <Icon name="wifi_off" color="var(--md-sys-color-primary)" />
-                  <span className="typescale-body-medium">100% offline, langsung siap kapan saja</span>
+                  <span className="typescale-body-medium">100% offline, tanpa akun & tanpa iklan</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <Icon name="palette" color="var(--md-sys-color-primary)" />
@@ -148,15 +230,12 @@ export function Onboarding() {
 
         {/* Step 1: Semester */}
         {step === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '12px' }}>
             <div>
-              <span className="typescale-label-medium" style={{ color: 'var(--md-sys-color-primary)' }}>
-                LANGKAH 1 DARI 3
-              </span>
-              <h2 className="typescale-headline-small" style={{ margin: '4px 0 8px 0' }}>
+              <h2 className="typescale-headline-small" style={{ margin: '0 0 6px 0', fontWeight: 800 }}>
                 Atur Semester Aktif
               </h2>
-              <p className="typescale-body-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+              <p className="typescale-body-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)', margin: 0 }}>
                 Mata kuliah dan jadwalmu akan dikelompokkan ke dalam semester ini.
               </p>
             </div>
@@ -170,61 +249,16 @@ export function Onboarding() {
               autoFocus
             />
 
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                  color: 'var(--md-sys-color-on-surface-variant)',
-                  marginBottom: '6px',
-                }}
-              >
-                Tanggal Mulai Semester
-              </label>
-              <input
-                type="date"
-                aria-label="Tanggal Mulai Semester"
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <DateField
+                label="Tanggal Mulai"
                 value={tglMulai}
-                onChange={(e) => setTglMulai(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                  border: '1px solid var(--md-sys-color-outline)',
-                  background: 'var(--md-sys-color-surface)',
-                  color: 'var(--md-sys-color-on-surface)',
-                  fontFamily: 'var(--md-ref-typeface-plain)',
-                  fontSize: 'var(--md-sys-typescale-body-large-size)',
-                }}
+                onChange={setTglMulai}
               />
-            </div>
-
-            <div>
-              <label
-                style={{
-                  display: 'block',
-                  fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                  color: 'var(--md-sys-color-on-surface-variant)',
-                  marginBottom: '6px',
-                }}
-              >
-                Tanggal Selesai Semester
-              </label>
-              <input
-                type="date"
-                aria-label="Tanggal Selesai Semester"
+              <DateField
+                label="Tanggal Selesai"
                 value={tglSelesai}
-                onChange={(e) => setTglSelesai(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                  border: '1px solid var(--md-sys-color-outline)',
-                  background: 'var(--md-sys-color-surface)',
-                  color: 'var(--md-sys-color-on-surface)',
-                  fontFamily: 'var(--md-ref-typeface-plain)',
-                  fontSize: 'var(--md-sys-typescale-body-large-size)',
-                }}
+                onChange={setTglSelesai}
               />
             </div>
           </div>
@@ -232,15 +266,12 @@ export function Onboarding() {
 
         {/* Step 2: Mata Kuliah Pertama */}
         {step === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '12px' }}>
             <div>
-              <span className="typescale-label-medium" style={{ color: 'var(--md-sys-color-primary)' }}>
-                LANGKAH 2 DARI 3
-              </span>
-              <h2 className="typescale-headline-small" style={{ margin: '4px 0 8px 0' }}>
+              <h2 className="typescale-headline-small" style={{ margin: '0 0 6px 0', fontWeight: 800 }}>
                 Tambah Mata Kuliah Pertama
               </h2>
-              <p className="typescale-body-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+              <p className="typescale-body-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)', margin: 0 }}>
                 Cukup isi nama mata kuliah, kolom lainnya opsional.
               </p>
             </div>
@@ -287,15 +318,12 @@ export function Onboarding() {
 
         {/* Step 3: Sesi Jadwal */}
         {step === 3 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '16px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '12px' }}>
             <div>
-              <span className="typescale-label-medium" style={{ color: 'var(--md-sys-color-primary)' }}>
-                LANGKAH 3 DARI 3
-              </span>
-              <h2 className="typescale-headline-small" style={{ margin: '4px 0 8px 0' }}>
+              <h2 className="typescale-headline-small" style={{ margin: '0 0 6px 0', fontWeight: 800 }}>
                 Jadwal Kelas: {namaMatkul || 'Mata Kuliah'}
               </h2>
-              <p className="typescale-body-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+              <p className="typescale-body-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)', margin: 0 }}>
                 Kapan jadwal kelas ini berlangsung setiap minggunya?
               </p>
             </div>
@@ -316,63 +344,16 @@ export function Onboarding() {
             />
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                    color: 'var(--md-sys-color-on-surface-variant)',
-                    marginBottom: '6px',
-                  }}
-                >
-                  Jam Mulai
-                </label>
-                <input
-                  type="time"
-                  aria-label="Jam Mulai"
-                  value={jamMulai}
-                  onChange={(e) => setJamMulai(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                    border: '1px solid var(--md-sys-color-outline)',
-                    background: 'var(--md-sys-color-surface)',
-                    color: 'var(--md-sys-color-on-surface)',
-                    fontFamily: 'var(--md-ref-typeface-plain)',
-                    fontSize: 'var(--md-sys-typescale-body-large-size)',
-                  }}
-                />
-              </div>
-
-              <div>
-                <label
-                  style={{
-                    display: 'block',
-                    fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                    color: 'var(--md-sys-color-on-surface-variant)',
-                    marginBottom: '6px',
-                  }}
-                >
-                  Jam Selesai
-                </label>
-                <input
-                  type="time"
-                  aria-label="Jam Selesai"
-                  value={jamSelesai}
-                  onChange={(e) => setJamSelesai(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px',
-                    borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                    border: '1px solid var(--md-sys-color-outline)',
-                    background: 'var(--md-sys-color-surface)',
-                    color: 'var(--md-sys-color-on-surface)',
-                    fontFamily: 'var(--md-ref-typeface-plain)',
-                    fontSize: 'var(--md-sys-typescale-body-large-size)',
-                  }}
-                />
-              </div>
+              <TimeField
+                label="Jam Mulai"
+                value={jamMulai}
+                onChange={setJamMulai}
+              />
+              <TimeField
+                label="Jam Selesai"
+                value={jamSelesai}
+                onChange={setJamSelesai}
+              />
             </div>
 
             <TextField
@@ -387,7 +368,8 @@ export function Onboarding() {
                 style={{
                   display: 'block',
                   fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                  color: 'var(--md-sys-color-on-surface-variant)',
+                  fontWeight: 700,
+                  color: 'var(--md-sys-color-on-surface)',
                   marginBottom: '8px',
                 }}
               >
@@ -406,22 +388,23 @@ export function Onboarding() {
         )}
       </div>
 
-      {/* Navigasi Aksi Bawah */}
+      {/* Navigasi Aksi Bawah Sticky */}
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginTop: '32px',
-          paddingTop: '16px',
+          padding: '16px 20px calc(24px + env(safe-area-inset-bottom, 0px)) 20px',
           borderTop: '1px solid var(--md-sys-color-outline-variant)',
+          backgroundColor: 'var(--md-sys-color-surface)',
+          marginTop: '24px',
         }}
       >
         {step > 0 ? (
           <Button
             variant="text"
             icon="arrow_back"
-            onClick={() => setStep((s) => (s - 1) as any)}
+            onClick={() => gantiStep((step - 1) as any)}
           >
             Kembali
           </Button>
@@ -433,7 +416,8 @@ export function Onboarding() {
           <Button
             variant="filled"
             trailingIcon="arrow_forward"
-            onClick={() => setStep(1)}
+            onClick={() => gantiStep(1)}
+            style={{ fontWeight: 700 }}
           >
             Mulai Sekarang
           </Button>
@@ -444,7 +428,8 @@ export function Onboarding() {
             variant="filled"
             trailingIcon="arrow_forward"
             disabled={!namaSemester.trim()}
-            onClick={() => setStep(2)}
+            onClick={() => gantiStep(2)}
+            style={{ fontWeight: 700 }}
           >
             Lanjut
           </Button>
@@ -455,7 +440,8 @@ export function Onboarding() {
             variant="filled"
             trailingIcon="arrow_forward"
             disabled={!namaMatkul.trim()}
-            onClick={() => setStep(3)}
+            onClick={() => gantiStep(3)}
+            style={{ fontWeight: 700 }}
           >
             Lanjut ke Jadwal
           </Button>
@@ -466,6 +452,7 @@ export function Onboarding() {
             variant="filled"
             icon="check"
             onClick={handleSelesai}
+            style={{ fontWeight: 700 }}
           >
             Selesai & Mulai
           </Button>

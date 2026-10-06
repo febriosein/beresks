@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { addDays, format, getISODay } from 'date-fns';
+import { useState, useEffect, useMemo } from 'react';
+import { addDays, format } from 'date-fns';
 import {
   BottomSheet,
   TextField,
@@ -9,17 +9,32 @@ import {
   FilterChip,
   AssistChip,
   Checkbox,
+  DateField,
+  Icon,
   showSnackbar,
 } from '../../ui/index.js';
 import { useQuickAddStore } from './useQuickAddStore.js';
 import { parseQuickAdd } from './parseQuickAdd.js';
-import { useDaftarMatkul, useSemuaSesi, tambahTugas, hapusTugas } from '../../data/repo/index.js';
-import { cariSesiSedangBerlangsungAtauBaruBerakhir, cariTenggatPertemuanBerikutnya } from '../jadwal/sesiHelpers.js';
-import { setAkhirHari } from '../../lib/tanggal.js';
+import {
+  useDaftarMatkul,
+  useSemuaSesi,
+  tambahTugas,
+  ubahTugas,
+  hapusTugas,
+  ambilTugasById,
+} from '../../data/repo/index.js';
+import {
+  cariSesiSedangBerlangsungAtauBaruBerakhir,
+  cariTenggatPertemuanBerikutnya,
+} from '../jadwal/sesiHelpers.js';
+import { setAkhirHari, formatTenggat } from '../../lib/tanggal.js';
+import { haptic } from '../../lib/haptic.js';
 
 export function QuickAddSheet() {
   const {
     isOpen,
+    mode,
+    editTugasId,
     preselectedMatkulId,
     draftJudul,
     draftCatatan,
@@ -29,6 +44,8 @@ export function QuickAddSheet() {
     setDraft,
     resetDraft,
   } = useQuickAddStore();
+
+  const isEditMode = mode === 'ubah';
 
   const daftarMatkulRaw = useDaftarMatkul();
   const daftarMatkul = useMemo(() => daftarMatkulRaw || [], [daftarMatkulRaw]);
@@ -44,9 +61,33 @@ export function QuickAddSheet() {
   const [showCatatan, setShowCatatan] = useState(Boolean(draftCatatan));
   const [showDatePicker, setShowDatePicker] = useState(false);
 
-  // Simpan draft ke store setiap kali berubah
+  // Sinkronisasi state lokal saat sheet dibuka atau ganti mode
   useEffect(() => {
-    if (isOpen) {
+    if (!isOpen) return;
+
+    setJudul(draftJudul);
+    setCatatan(draftCatatan);
+    setPrioritas(draftPrioritas);
+    setTenggat(draftTenggat);
+    setShowCatatan(Boolean(draftCatatan));
+    setTenggatManualDipilih(isEditMode || Boolean(draftTenggat));
+    setShowDatePicker(false);
+
+    if (preselectedMatkulId) {
+      setMatkulId(String(preselectedMatkulId));
+    } else if (daftarMatkul.length > 0) {
+      const sesiAktif = cariSesiSedangBerlangsungAtauBaruBerakhir(daftarSesi);
+      if (sesiAktif && daftarMatkul.some((m) => m.id === sesiAktif.matkulId)) {
+        setMatkulId(String(sesiAktif.matkulId));
+      } else {
+        setMatkulId(String(daftarMatkul[0].id));
+      }
+    }
+  }, [isOpen, isEditMode, editTugasId, draftJudul, draftCatatan, draftPrioritas, draftTenggat, preselectedMatkulId, daftarMatkul, daftarSesi]);
+
+  // Simpan draft hanya di mode tambah
+  useEffect(() => {
+    if (isOpen && !isEditMode) {
       setDraft({
         draftJudul: judul,
         draftCatatan: catatan,
@@ -54,30 +95,17 @@ export function QuickAddSheet() {
         draftTenggat: tenggat,
       });
     }
-  }, [judul, catatan, prioritas, tenggat, isOpen, setDraft]);
+  }, [judul, catatan, prioritas, tenggat, isOpen, isEditMode, setDraft]);
 
-  // Inisialisasi saat sheet dibuka
-  useEffect(() => {
-    if (!isOpen) return;
+  // Parsing bahasa alami untuk judul
+  const parsedNL = useMemo(() => {
+    if (isEditMode || !judul.trim()) return null;
+    return parseQuickAdd(judul);
+  }, [judul, isEditMode]);
 
-    if (preselectedMatkulId) {
-      setMatkulId(String(preselectedMatkulId));
-    } else if (daftarMatkul.length > 0 && !matkulId) {
-      // Cek apakah ada sesi sedang berlangsung / baru selesai <= 30 menit
-      const sesiAktif = cariSesiSedangBerlangsungAtauBaruBerakhir(daftarSesi);
-      if (sesiAktif && daftarMatkul.some((m) => m.id === sesiAktif.matkulId)) {
-        setMatkulId(String(sesiAktif.matkulId));
-      } else {
-        // Default ke mata kuliah pertama
-        setMatkulId(String(daftarMatkul[0].id));
-      }
-    }
-  }, [isOpen, preselectedMatkulId, daftarMatkul, daftarSesi, matkulId]);
-
-  // Parsing natural language saat judul berubah (jika user belum memilih chip secara manual)
   const handleJudulChange = (teks: string) => {
     setJudul(teks);
-    if (!tenggatManualDipilih) {
+    if (!tenggatManualDipilih && !isEditMode) {
       const parsed = parseQuickAdd(teks);
       if (parsed.tenggat !== undefined) {
         setTenggat(parsed.tenggat);
@@ -85,34 +113,33 @@ export function QuickAddSheet() {
     }
   };
 
-  // Pilihan chip tenggat pintar
+  // Opsi Chip Tenggat
   const sekarang = useMemo(() => new Date(), [isOpen]);
+  const hariIniMs = setAkhirHari(sekarang).getTime();
   const besokMs = setAkhirHari(addDays(sekarang, 1)).getTime();
+  const tigaHariMs = setAkhirHari(addDays(sekarang, 3)).getTime();
   const mingguDepanMs = setAkhirHari(addDays(sekarang, 7)).getTime();
 
   // Pertemuan berikutnya
   const sesiMatkulTerpilih = daftarSesi.filter((s) => s.matkulId === Number(matkulId));
   const pertemuanBerikutnyaMs = cariTenggatPertemuanBerikutnya(sesiMatkulTerpilih, sekarang);
 
-  // Hari pilihan (Jumat terdekat berikutnya)
-  const currentDay = getISODay(sekarang);
-  const daysToJumat = (5 - currentDay + 7) % 7 || 7;
-  const jumatMs = setAkhirHari(addDays(sekarang, daysToJumat)).getTime();
-
   const handlePilihTenggatChip = (ms: number | null) => {
     setTenggatManualDipilih(true);
     setTenggat((prev) => (prev === ms ? null : ms));
   };
 
-  // Handler simpan
+  // Simpan / Tambah / Ubah
   const simpan = async (tambahLagi = false) => {
     let judulBersih = judul.trim();
     let finalTenggat = tenggat;
 
-    if (!judulBersih) return;
+    if (!judulBersih) {
+      showSnackbar({ message: 'Judul tugas wajib diisi' });
+      return;
+    }
 
-    // Jika user belum memilih chip manual, parse dan buang kata tenggat dari judul
-    if (!tenggatManualDipilih) {
+    if (!tenggatManualDipilih && !isEditMode) {
       const parsed = parseQuickAdd(judulBersih);
       if (parsed.tenggat !== undefined) {
         finalTenggat = parsed.tenggat;
@@ -121,100 +148,198 @@ export function QuickAddSheet() {
     }
 
     const selectedMatkul = Number(matkulId) || (daftarMatkul[0]?.id ?? 0);
-    if (!selectedMatkul) return;
-
-    // Haptic feedback
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      navigator.vibrate(50);
+    if (!selectedMatkul) {
+      showSnackbar({ message: 'Pilih mata kuliah terlebih dahulu' });
+      return;
     }
 
-    const createdId = await tambahTugas({
-      matkulId: selectedMatkul,
-      judul: judulBersih,
-      catatan: catatan.trim() || undefined,
-      prioritas,
-      tenggat: finalTenggat,
-      status: 'belum',
-    });
+    haptic('success');
 
-    // Tampilkan snackbar urungkan
+    if (isEditMode && editTugasId) {
+      await ubahTugas(editTugasId, {
+        matkulId: selectedMatkul,
+        judul: judulBersih,
+        catatan: catatan.trim() || undefined,
+        prioritas,
+        tenggat: finalTenggat,
+      });
+
+      showSnackbar({ message: 'Perubahan tugas disimpan' });
+      closeQuickAdd();
+      resetDraft();
+    } else {
+      const createdId = await tambahTugas({
+        matkulId: selectedMatkul,
+        judul: judulBersih,
+        catatan: catatan.trim() || undefined,
+        prioritas,
+        tenggat: finalTenggat,
+        status: 'belum',
+      });
+
+      showSnackbar({
+        message: 'Tugas dicatat 🎉',
+        actionLabel: 'Urungkan',
+        duration: 6000,
+        onAction: async () => {
+          await hapusTugas(createdId);
+        },
+      });
+
+      if (tambahLagi) {
+        setJudul('');
+        setCatatan('');
+        setPrioritas(false);
+        setTenggat(null);
+        setTenggatManualDipilih(false);
+        setShowCatatan(false);
+        setDraft({
+          draftJudul: '',
+          draftCatatan: '',
+          draftPrioritas: false,
+          draftTenggat: null,
+        });
+      } else {
+        closeQuickAdd();
+        resetDraft();
+      }
+    }
+  };
+
+  // Hapus tugas saat di mode ubah
+  const handleHapus = async () => {
+    if (!isEditMode || !editTugasId) return;
+
+    haptic('warning');
+    const existing = await ambilTugasById(editTugasId);
+    await hapusTugas(editTugasId);
+
+    closeQuickAdd();
+    resetDraft();
+
     showSnackbar({
-      message: 'Tugas ditambahkan',
+      message: 'Tugas dihapus',
       actionLabel: 'Urungkan',
       duration: 6000,
       onAction: async () => {
-        await hapusTugas(createdId);
+        if (existing) {
+          await tambahTugas({
+            matkulId: existing.matkulId,
+            judul: existing.judul,
+            catatan: existing.catatan,
+            prioritas: existing.prioritas,
+            tenggat: existing.tenggat,
+            status: existing.status,
+          });
+        }
       },
     });
-
-    if (tambahLagi) {
-      // Kosongkan kolom tapi pertahankan matkul
-      setJudul('');
-      setCatatan('');
-      setPrioritas(false);
-      setTenggat(null);
-      setTenggatManualDipilih(false);
-      setShowCatatan(false);
-      setDraft({
-        draftJudul: '',
-        draftCatatan: '',
-        draftPrioritas: false,
-        draftTenggat: null,
-      });
-    } else {
-      resetDraft();
-      closeQuickAdd();
-      // Reset local state
-      setJudul('');
-      setCatatan('');
-      setPrioritas(false);
-      setTenggat(null);
-      setTenggatManualDipilih(false);
-      setShowCatatan(false);
-    }
   };
 
-  // Long press pada tombol simpan untuk "Simpan & tambah lagi"
-  const pressTimer = useRef<any>(null);
-  const handlePointerDown = () => {
-    pressTimer.current = setTimeout(() => {
-      simpan(true);
-      pressTimer.current = null;
-    }, 600);
-  };
-  const handlePointerUp = () => {
-    if (pressTimer.current) {
-      clearTimeout(pressTimer.current);
-      pressTimer.current = null;
-      simpan(false);
-    }
-  };
+  // Sticky footer buttons
+  const footerContent = (
+    <div
+      style={{
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '8px',
+      }}
+    >
+      {isEditMode ? (
+        <>
+          <Button
+            variant="text"
+            icon="delete"
+            onClick={handleHapus}
+            style={{ color: 'var(--md-sys-color-error)' }}
+          >
+            Hapus
+          </Button>
+          <Button
+            variant="filled"
+            icon="check"
+            disabled={!judul.trim() || daftarMatkul.length === 0}
+            onClick={() => simpan(false)}
+          >
+            Simpan Perubahan
+          </Button>
+        </>
+      ) : (
+        <>
+          <Button
+            variant="text"
+            disabled={!judul.trim() || daftarMatkul.length === 0}
+            onClick={() => simpan(true)}
+          >
+            Simpan & Tambah Lagi
+          </Button>
+          <Button
+            variant="filled"
+            icon="add"
+            disabled={!judul.trim() || daftarMatkul.length === 0}
+            onClick={() => simpan(false)}
+          >
+            Simpan
+          </Button>
+        </>
+      )}
+    </div>
+  );
 
   return (
     <BottomSheet
       open={isOpen}
       onOpenChange={(open) => {
-        if (!open) closeQuickAdd();
+        if (!open) {
+          closeQuickAdd();
+          resetDraft();
+        }
       }}
-      title="Catat Tugas Baru"
-      description="Catat tugas baru secepat mungkin"
+      title={isEditMode ? 'Ubah Tugas' : 'Catat Tugas Baru'}
+      description={isEditMode ? 'Edit detail tugas yang dipilih' : 'Catat tugas baru secepat mungkin'}
+      footer={footerContent}
     >
       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        {/* Input Judul Tugas (AutoFocus) */}
-        <TextField
-          label="Judul Tugas"
-          value={judul}
-          onChange={handleJudulChange}
-          placeholder="Misal: Laporan praktikum jumat"
-          autoFocus={isOpen}
-          required
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              simpan(false);
-            }
-          }}
-        />
+        {/* Input Judul Tugas */}
+        <div>
+          <TextField
+            label="Judul Tugas"
+            value={judul}
+            onChange={handleJudulChange}
+            placeholder="Misal: Laporan praktikum jumat"
+            autoFocus={isOpen}
+            required
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                simpan(false);
+              }
+            }}
+          />
+
+          {/* Pratinjau Deteksi Bahasa Alami */}
+          {!tenggatManualDipilih && parsedNL && parsedNL.tenggat !== undefined && (
+            <div
+              style={{
+                marginTop: '6px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '4px 10px',
+                borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
+                backgroundColor: 'var(--md-sys-color-secondary-container)',
+                color: 'var(--md-sys-color-on-secondary-container)',
+                fontSize: 'var(--md-sys-typescale-label-small-size, 11px)',
+                fontWeight: 'bold',
+              }}
+            >
+              <Icon name="event_upcoming" size="14px" />
+              <span>Terdeteksi tenggat: {formatTenggat(parsedNL.tenggat)}</span>
+            </div>
+          )}
+        </div>
 
         {/* Pilihan Mata Kuliah */}
         {daftarMatkul.length > 0 ? (
@@ -235,26 +360,37 @@ export function QuickAddSheet() {
               color: 'var(--md-sys-color-error)',
             }}
           >
-            Belum ada mata kuliah. Silakan buat mata kuliah terlebih dahulu.
+            Belum ada mata kuliah. Silakan buat mata kuliah terlebih dahulu di tab Mata Kuliah.
           </div>
         )}
 
-        {/* Chip Tenggat Pintar */}
+        {/* Chip Pilihan Tenggat Waktu */}
         <div>
           <div
             style={{
               fontSize: 'var(--md-sys-typescale-label-medium-size)',
               color: 'var(--md-sys-color-on-surface-variant)',
               marginBottom: '8px',
+              fontWeight: 500,
             }}
           >
             Tenggat Waktu:
           </div>
           <ChipSet>
             <FilterChip
+              label="Hari Ini"
+              selected={tenggat === hariIniMs}
+              onClick={() => handlePilihTenggatChip(hariIniMs)}
+            />
+            <FilterChip
               label="Besok"
               selected={tenggat === besokMs}
               onClick={() => handlePilihTenggatChip(besokMs)}
+            />
+            <FilterChip
+              label="3 Hari"
+              selected={tenggat === tigaHariMs}
+              onClick={() => handlePilihTenggatChip(tigaHariMs)}
             />
             {pertemuanBerikutnyaMs && (
               <FilterChip
@@ -264,18 +400,13 @@ export function QuickAddSheet() {
               />
             )}
             <FilterChip
-              label="Jumat"
-              selected={tenggat === jumatMs}
-              onClick={() => handlePilihTenggatChip(jumatMs)}
-            />
-            <FilterChip
               label="Minggu Depan"
               selected={tenggat === mingguDepanMs}
               onClick={() => handlePilihTenggatChip(mingguDepanMs)}
             />
             <AssistChip
               label={
-                tenggat && ![besokMs, pertemuanBerikutnyaMs, jumatMs, mingguDepanMs].includes(tenggat)
+                tenggat && ![hariIniMs, besokMs, tigaHariMs, pertemuanBerikutnyaMs, mingguDepanMs].includes(tenggat)
                   ? format(new Date(tenggat), 'd MMM yyyy')
                   : 'Pilih Tanggal'
               }
@@ -286,29 +417,18 @@ export function QuickAddSheet() {
 
           {showDatePicker && (
             <div style={{ marginTop: '12px' }}>
-              <input
-                type="date"
-                aria-label="Pilih tanggal tenggat"
+              <DateField
+                label="Pilih Tanggal Tenggat"
                 value={tenggat ? format(new Date(tenggat), 'yyyy-MM-dd') : ''}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    const [y, m, d] = e.target.value.split('-').map(Number);
+                onChange={(val) => {
+                  if (val) {
+                    const [y, m, d] = val.split('-').map(Number);
                     const dt = setAkhirHari(new Date(y, m - 1, d));
                     setTenggatManualDipilih(true);
                     setTenggat(dt.getTime());
                   } else {
                     setTenggat(null);
                   }
-                }}
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                  border: '1px solid var(--md-sys-color-outline)',
-                  background: 'var(--md-sys-color-surface)',
-                  color: 'var(--md-sys-color-on-surface)',
-                  fontFamily: 'var(--md-ref-typeface-plain)',
-                  fontSize: 'var(--md-sys-typescale-body-large-size)',
                 }}
               />
             </div>
@@ -336,6 +456,7 @@ export function QuickAddSheet() {
               fontFamily: 'var(--md-ref-typeface-plain)',
               fontSize: 'var(--md-sys-typescale-body-medium-size)',
               userSelect: 'none',
+              minHeight: '48px',
             }}
           >
             <Checkbox
@@ -343,7 +464,7 @@ export function QuickAddSheet() {
               onChange={(c) => setPrioritas(c)}
               ariaLabel="Tandai Penting"
             />
-            <span>Penting</span>
+            <span style={{ fontWeight: 500 }}>Penting</span>
           </label>
         </div>
 
@@ -352,32 +473,10 @@ export function QuickAddSheet() {
             label="Catatan Tambahan (Opsional)"
             value={catatan}
             onChange={setCatatan}
-            placeholder="Keterangan format, link pengumpulan, dll."
+            placeholder="Keterangan format, link pengumpulan, instruksi dosen, dll."
             rows={2}
           />
         )}
-
-        {/* Tombol Simpan */}
-        <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <Button
-            variant="filled"
-            icon="check"
-            disabled={!judul.trim() || daftarMatkul.length === 0}
-            onPointerDown={handlePointerDown}
-            onPointerUp={handlePointerUp}
-          >
-            Simpan
-          </Button>
-          <div
-            style={{
-              textAlign: 'center',
-              fontSize: 'var(--md-sys-typescale-label-small-size)',
-              color: 'var(--md-sys-color-on-surface-variant)',
-            }}
-          >
-            Tahan tombol Simpan untuk simpan & tambah lagi
-          </div>
-        </div>
       </div>
     </BottomSheet>
   );

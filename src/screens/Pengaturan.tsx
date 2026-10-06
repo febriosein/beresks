@@ -11,6 +11,7 @@ import {
   showSnackbar,
   useRegisterFab,
 } from '../ui/index.js';
+import { Screen, ScreenHeader, DateField } from '../ui/layout/index.js';
 import {
   useDaftarSemester,
   useSemesterAktif,
@@ -33,6 +34,7 @@ import {
 } from '../features/backup/backupRestore.js';
 import { hasilkanIcs, unduhFileIcs } from '../features/ics/exportIcs.js';
 import { format, addMonths } from 'date-fns';
+import { haptic } from '../lib/haptic.js';
 
 export function Pengaturan() {
   const navigate = useNavigate();
@@ -74,6 +76,7 @@ export function Pengaturan() {
 
   const handleInstallClick = async () => {
     if (installPrompt) {
+      haptic('light');
       installPrompt.prompt();
       const choice = await installPrompt.userChoice;
       if (choice.outcome === 'accepted') {
@@ -85,6 +88,7 @@ export function Pengaturan() {
   // Tambah Semester
   const handleSimpanSemester = async () => {
     if (!namaSemester.trim()) return;
+    haptic('success');
     const sId = await tambahSemester({
       nama: namaSemester.trim(),
       tanggalMulai: new Date(tglMulai).getTime(),
@@ -99,10 +103,12 @@ export function Pengaturan() {
   // Ekspor Kalender .ics
   const handleEksporIcs = () => {
     if (!semesterAktif) {
+      haptic('warning');
       showSnackbar({ message: 'Tidak ada semester aktif untuk diekspor' });
       return;
     }
 
+    haptic('light');
     const icsText = hasilkanIcs({
       semester: semesterAktif,
       daftarMatkul,
@@ -116,6 +122,7 @@ export function Pengaturan() {
 
   // Ekspor Backup JSON
   const handleEksporBackup = async () => {
+    haptic('light');
     const backup = await buatBackupData();
     unduhFileBackup(backup);
     showSnackbar({ message: 'Cadangan data berhasil diunduh' });
@@ -132,13 +139,16 @@ export function Pengaturan() {
         const rawJson = JSON.parse(event.target?.result as string);
         const hasilValidasi = validasiBackupData(rawJson);
         if (!hasilValidasi.valid || !hasilValidasi.data) {
+          haptic('error');
           showSnackbar({ message: `Gagal: ${hasilValidasi.pesan || 'Format file salah'}` });
           return;
         }
 
+        haptic('light');
         setPayloadRestore(hasilValidasi.data);
         setDialogRestoreOpen(true);
       } catch {
+        haptic('error');
         showSnackbar({ message: 'File bukan JSON yang valid' });
       }
     };
@@ -150,6 +160,7 @@ export function Pengaturan() {
   // Konfirmasi Pulihkan Backup
   const handleKonfirmasiRestore = async () => {
     if (!payloadRestore) return;
+    haptic('success');
     await pulihkanBackupData(payloadRestore);
     setDialogRestoreOpen(false);
     setPayloadRestore(null);
@@ -158,25 +169,26 @@ export function Pengaturan() {
   };
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', padding: '16px', paddingBottom: 'calc(120px + env(safe-area-inset-bottom, 0px))' }}>
-      {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+    <Screen size="normal">
+      {/* Top Header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
         <IconButton
           icon="arrow_back"
-          ariaLabel="Kembali"
-          onClick={() => navigate('/')}
+          ariaLabel="Kembali ke Beranda"
+          onClick={() => {
+            haptic('light');
+            navigate('/');
+          }}
         />
-        <div>
-          <h1 className="typescale-headline-small" style={{ margin: 0 }}>
-            Pengaturan
-          </h1>
-          <p className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)', marginTop: '2px' }}>
-            Semester, kalender, cadangan & info PWA
-          </p>
+        <div style={{ flex: 1 }}>
+          <ScreenHeader
+            title="Pengaturan"
+            subtitle="Semester, kalender, cadangan & info PWA"
+          />
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         {/* SEKSI TEMA TAMPILAN */}
         <Card
           variant="outlined"
@@ -204,7 +216,7 @@ export function Pengaturan() {
               <Icon name="palette" size="22px" />
             </div>
             <div>
-              <h2 className="typescale-title-medium" style={{ margin: 0 }}>
+              <h2 className="typescale-title-medium" style={{ margin: 0, fontWeight: 700 }}>
                 Tema Tampilan
               </h2>
               <p
@@ -224,6 +236,7 @@ export function Pengaturan() {
             ]}
             selected={pengaturan.tema || 'sistem'}
             onChange={(val) => {
+              haptic('selection');
               simpanPengaturan({ tema: val as any });
               showSnackbar({ message: `Tema diubah ke mode ${val}` });
             }}
@@ -244,10 +257,10 @@ export function Pengaturan() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '10px' }}>
               <Icon name="install_mobile" size="28px" />
               <div>
-                <h2 className="typescale-title-medium" style={{ margin: 0 }}>
+                <h2 className="typescale-title-medium" style={{ margin: 0, fontWeight: 700 }}>
                   Pasang BereSKS di Layar Utama
                 </h2>
-                <p className="typescale-body-small" style={{ opacity: 0.9 }}>
+                <p className="typescale-body-small" style={{ opacity: 0.9, margin: 0 }}>
                   Akses instan seperti aplikasi native dan 100% offline.
                 </p>
               </div>
@@ -262,6 +275,8 @@ export function Pengaturan() {
                   backgroundColor: 'var(--md-sys-color-primary)',
                   color: 'var(--md-sys-color-on-primary)',
                   width: '100%',
+                  fontWeight: 700,
+                  marginTop: '8px',
                 }}
               >
                 Pasang ke Layar Beranda
@@ -279,13 +294,14 @@ export function Pengaturan() {
         {/* SEKSI 2: MANAJEMEN SEMESTER */}
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-            <h2 className="typescale-title-medium" style={{ margin: 0 }}>
+            <h2 className="typescale-title-medium" style={{ margin: 0, fontWeight: 700 }}>
               Daftar Semester
             </h2>
             <Button
               variant="text"
               icon="add"
               onClick={() => {
+                haptic('light');
                 setNamaSemester('');
                 setDialogSemesterOpen(true);
               }}
@@ -309,7 +325,7 @@ export function Pengaturan() {
               >
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <h3 className="typescale-title-medium" style={{ margin: 0 }}>
+                    <h3 className="typescale-title-medium" style={{ margin: 0, fontWeight: 700 }}>
                       {sem.nama}
                     </h3>
                     {sem.aktif && (
@@ -340,6 +356,7 @@ export function Pengaturan() {
                     <Button
                       variant="text"
                       onClick={async () => {
+                        haptic('selection');
                         await aktifkanSemester(sem.id!);
                         showSnackbar({ message: `Semester aktif diubah ke ${sem.nama}` });
                       }}
@@ -352,6 +369,7 @@ export function Pengaturan() {
                       icon="delete"
                       ariaLabel="Hapus Semester"
                       onClick={async () => {
+                        haptic('warning');
                         await hapusSemester(sem.id!);
                         showSnackbar({ message: 'Semester dihapus' });
                       }}
@@ -365,14 +383,14 @@ export function Pengaturan() {
 
         {/* SEKSI 3: KALENDER & PENGINGAT (.ICS) */}
         <div>
-          <h2 className="typescale-title-medium" style={{ margin: '0 0 8px 0' }}>
+          <h2 className="typescale-title-medium" style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
             Ekspor Kalender
           </h2>
           <Card variant="outlined" style={{ padding: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '14px' }}>
               <Icon name="event_upcoming" size="32px" color="var(--md-sys-color-primary)" />
               <div>
-                <h3 className="typescale-title-small" style={{ margin: 0 }}>
+                <h3 className="typescale-title-small" style={{ margin: 0, fontWeight: 700 }}>
                   Sinkronkan ke Google Calendar / Apple Calendar
                 </h3>
                 <p className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)', marginTop: '2px' }}>
@@ -384,7 +402,7 @@ export function Pengaturan() {
               variant="outlined"
               icon="calendar_month"
               onClick={handleEksporIcs}
-              style={{ width: '100%' }}
+              style={{ width: '100%', fontWeight: 700 }}
             >
               Unduh Berkas Kalender (.ics)
             </Button>
@@ -393,7 +411,7 @@ export function Pengaturan() {
 
         {/* SEKSI 4: CADANGAN DATA (BACKUP & RESTORE) */}
         <div>
-          <h2 className="typescale-title-medium" style={{ margin: '0 0 8px 0' }}>
+          <h2 className="typescale-title-medium" style={{ margin: '0 0 8px 0', fontWeight: 700 }}>
             Cadangan & Pemulihan (Offline)
           </h2>
           <Card variant="outlined" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -406,6 +424,7 @@ export function Pengaturan() {
                 variant="outlined"
                 icon="file_download"
                 onClick={handleEksporBackup}
+                style={{ fontWeight: 600 }}
               >
                 Ekspor JSON
               </Button>
@@ -413,7 +432,11 @@ export function Pengaturan() {
               <Button
                 variant="outlined"
                 icon="file_upload"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => {
+                  haptic('light');
+                  fileInputRef.current?.click();
+                }}
+                style={{ fontWeight: 600 }}
               >
                 Pulihkan JSON
               </Button>
@@ -452,7 +475,7 @@ export function Pengaturan() {
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}
               />
             </div>
-            <h3 className="typescale-title-medium" style={{ margin: '10px 0 2px 0' }}>
+            <h3 className="typescale-title-medium" style={{ margin: '10px 0 2px 0', fontWeight: 800 }}>
               BereSKS v0.3
             </h3>
             <p className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)', margin: 0 }}>
@@ -517,63 +540,17 @@ export function Pengaturan() {
             autoFocus
           />
 
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                color: 'var(--md-sys-color-on-surface-variant)',
-                marginBottom: '6px',
-              }}
-            >
-              Tanggal Mulai
-            </label>
-            <input
-              type="date"
-              aria-label="Tanggal Mulai"
-              value={tglMulai}
-              onChange={(e) => setTglMulai(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                border: '1px solid var(--md-sys-color-outline)',
-                background: 'var(--md-sys-color-surface)',
-                color: 'var(--md-sys-color-on-surface)',
-                fontFamily: 'var(--md-ref-typeface-plain)',
-                fontSize: 'var(--md-sys-typescale-body-large-size)',
-              }}
-            />
-          </div>
+          <DateField
+            label="Tanggal Mulai"
+            value={tglMulai}
+            onChange={setTglMulai}
+          />
 
-          <div>
-            <label
-              style={{
-                display: 'block',
-                fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                color: 'var(--md-sys-color-on-surface-variant)',
-                marginBottom: '6px',
-              }}
-            >
-              Tanggal Selesai
-            </label>
-            <input
-              type="date"
-              aria-label="Tanggal Selesai"
-              value={tglSelesai}
-              onChange={(e) => setTglSelesai(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                border: '1px solid var(--md-sys-color-outline)',
-                background: 'var(--md-sys-color-surface)',
-                color: 'var(--md-sys-color-on-surface)',
-                fontFamily: 'var(--md-ref-typeface-plain)',
-                fontSize: 'var(--md-sys-typescale-body-large-size)',
-              }}
-            />
-          </div>
+          <DateField
+            label="Tanggal Selesai"
+            value={tglSelesai}
+            onChange={setTglSelesai}
+          />
         </div>
       </Dialog>
 
@@ -591,7 +568,7 @@ export function Pengaturan() {
             <Button
               variant="filled"
               onClick={handleKonfirmasiRestore}
-              style={{ backgroundColor: 'var(--md-sys-color-error)', color: 'var(--md-sys-color-on-error)' }}
+              style={{ backgroundColor: 'var(--md-sys-color-error)', color: 'var(--md-sys-color-on-error)', fontWeight: 700 }}
             >
               Ganti & Pulihkan
             </Button>
@@ -602,6 +579,6 @@ export function Pengaturan() {
           Memulihkan cadangan akan menggantikan seluruh data jadwal, mata kuliah, dan tugas yang ada saat ini dengan data dari file cadangan ({payloadRestore?.data.mataKuliah.length} mata kuliah, {payloadRestore?.data.tugas.length} tugas).
         </p>
       </Dialog>
-    </div>
+    </Screen>
   );
 }

@@ -1,7 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import { getISODay } from 'date-fns';
 import {
+  Screen,
+  ScreenHeader,
+  Section,
+  EmptyState,
+  SkeletonCard,
+  StatusPill,
   Card,
   Button,
   IconButton,
@@ -23,17 +29,21 @@ import {
 } from '../features/jadwal/sesiHelpers.js';
 import { useQuickAddStore } from '../features/quick-add/useQuickAddStore.js';
 import { formatTanggalLengkap, formatHitungMundur, formatTenggat, apakahTerlambat } from '../lib/tanggal.js';
+import { haptic } from '../lib/haptic.js';
 
 export function HariIni() {
   const navigate = useNavigate();
   const semesterAktif = useSemesterAktif();
-  const daftarMatkul = useDaftarMatkul(semesterAktif?.id) || [];
-  const semuaSesi = useSemuaSesi() || [];
-  const tugasMendesak = useTugasMendesak(5) || [];
+  const daftarMatkulRaw = useDaftarMatkul(semesterAktif?.id);
+  const daftarMatkul = useMemo(() => daftarMatkulRaw || [], [daftarMatkulRaw]);
+  const semuaSesiRaw = useSemuaSesi();
+  const semuaSesi = useMemo(() => semuaSesiRaw || [], [semuaSesiRaw]);
+  const tugasMendesakRaw = useTugasMendesak(5);
+  const tugasMendesak = useMemo(() => tugasMendesakRaw || [], [tugasMendesakRaw]);
 
-  const { openQuickAdd } = useQuickAddStore();
+  const { openQuickAdd, openEditTugas } = useQuickAddStore();
 
-  // Tick timer tiap menit agar hitung mundur terbarui otomatis
+  // Tick timer per menit untuk memperbarui hitung mundur secara real time
   const [sekarang, setSekarang] = useState(() => new Date());
   useEffect(() => {
     const timer = setInterval(() => {
@@ -54,52 +64,118 @@ export function HariIni() {
   const hariIniIso = getISODay(sekarang) as 1 | 2 | 3 | 4 | 5 | 6 | 7;
   const menitSekarang = sekarang.getHours() * 60 + sekarang.getMinutes();
 
-  // Sesi hari ini
-  const sesiHariIni = semuaSesi
-    .filter((s) => s.hari === hariIniIso)
-    .sort((a, b) => parseWaktuKeMenit(a.jamMulai) - parseWaktuKeMenit(b.jamMulai));
+  // Sesi kuliah hari ini
+  const sesiHariIni = useMemo(() => {
+    return semuaSesi
+      .filter((s) => s.hari === hariIniIso)
+      .sort((a, b) => parseWaktuKeMenit(a.jamMulai) - parseWaktuKeMenit(b.jamMulai));
+  }, [semuaSesi, hariIniIso]);
 
   // Cek sesi sedang berlangsung
-  const sesiAktif = cariSesiSedangBerlangsungAtauBaruBerakhir(semuaSesi, sekarang);
+  const sesiAktif = useMemo(
+    () => cariSesiSedangBerlangsungAtauBaruBerakhir(semuaSesi, sekarang),
+    [semuaSesi, sekarang]
+  );
   const matkulSesiAktif = sesiAktif ? daftarMatkul.find((m) => m.id === sesiAktif.matkulId) : null;
 
+  // Hitung sisa menit & progress sesi aktif
+  const infoProgresSesi = useMemo(() => {
+    if (!sesiAktif) return null;
+    const mulai = parseWaktuKeMenit(sesiAktif.jamMulai);
+    const selesai = parseWaktuKeMenit(sesiAktif.jamSelesai);
+    const totalDurasi = Math.max(1, selesai - mulai);
+    const lewat = menitSekarang - mulai;
+    const pct = Math.min(100, Math.max(0, (lewat / totalDurasi) * 100));
+    const sisa = Math.max(0, selesai - menitSekarang);
+    return { progressPct: pct, sisaMenit: sisa };
+  }, [sesiAktif, menitSekarang]);
+
   // Cek sesi berikutnya
-  const infoBerikutnya = cariSesiBerikutnya(semuaSesi, sekarang);
-  const matkulBerikutnya = infoBerikutnya ? daftarMatkul.find((m) => m.id === infoBerikutnya.sesi.matkulId) : null;
+  const infoBerikutnya = useMemo(
+    () => cariSesiBerikutnya(semuaSesi, sekarang),
+    [semuaSesi, sekarang]
+  );
+  const matkulBerikutnya = infoBerikutnya
+    ? daftarMatkul.find((m) => m.id === infoBerikutnya.sesi.matkulId)
+    : null;
+
+  const isLoading = semuaSesiRaw === undefined || daftarMatkulRaw === undefined;
 
   return (
-    <div style={{ maxWidth: '640px', margin: '0 auto', width: '100%', padding: '16px', paddingBottom: 'calc(130px + env(safe-area-inset-bottom, 0px))' }}>
-      {/* Top Header */}
+    <Screen size="normal">
+      {/* Top Screen Header */}
+      <ScreenHeader
+        title={`${getSapaan()} 👋`}
+        subtitle={formatTanggalLengkap(sekarang.getTime())}
+        trailing={
+          <IconButton
+            icon="settings"
+            ariaLabel="Pengaturan BereSKS"
+            onClick={() => navigate('/pengaturan')}
+          />
+        }
+      />
+
+      {/* Ringkasan Status Hari Ini */}
       <div
         style={{
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
+          gap: '8px',
           marginBottom: '20px',
+          flexWrap: 'wrap',
         }}
       >
-        <div>
-          <span
-            className="typescale-label-medium"
-            style={{ color: 'var(--md-sys-color-primary)', fontWeight: 'bold' }}
-          >
-            {getSapaan()} 👋
-          </span>
-          <h1 className="typescale-headline-small" style={{ margin: '2px 0 0 0' }}>
-            {formatTanggalLengkap(sekarang.getTime())}
-          </h1>
-        </div>
+        <span
+          className="typescale-label-small"
+          style={{
+            backgroundColor: 'var(--md-sys-color-surface-container-high)',
+            color: 'var(--md-sys-color-on-surface-variant)',
+            padding: '4px 10px',
+            borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
+            fontWeight: 700,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+          }}
+        >
+          <Icon name="event" size="14px" color="var(--md-sys-color-primary)" />
+          <span>{sesiHariIni.length > 0 ? `${sesiHariIni.length} kelas hari ini` : 'Bebas kelas hari ini'}</span>
+        </span>
 
-        <IconButton
-          icon="settings"
-          ariaLabel="Pengaturan"
-          onClick={() => navigate('/pengaturan')}
-        />
+        <span
+          className="typescale-label-small"
+          style={{
+            backgroundColor:
+              tugasMendesak.length > 0
+                ? 'var(--kk-status-mendesak-container)'
+                : 'var(--kk-status-selesai-container)',
+            color:
+              tugasMendesak.length > 0
+                ? 'var(--kk-status-on-mendesak-container)'
+                : 'var(--kk-status-on-selesai-container)',
+            padding: '4px 10px',
+            borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
+            fontWeight: 700,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '5px',
+          }}
+        >
+          <Icon
+            name={tugasMendesak.length > 0 ? 'assignment_late' : 'task_alt'}
+            size="14px"
+          />
+          <span>{tugasMendesak.length > 0 ? `${tugasMendesak.length} tugas mendesak` : 'Semua tugas aman'}</span>
+        </span>
       </div>
 
-      {/* Kartu Besar "Berikutnya" atau "Sedang Berlangsung" */}
+      {/* Hero Card: "Sedang Berlangsung" atau "Kelas Berikutnya" */}
       <div style={{ marginBottom: '24px' }}>
-        {sesiAktif && matkulSesiAktif ? (
+        {isLoading ? (
+          <SkeletonCard />
+        ) : sesiAktif && matkulSesiAktif ? (
+          /* Sesi Sedang Berlangsung */
           <Card
             variant="filled"
             style={{
@@ -117,7 +193,7 @@ export function HariIni() {
                   color: 'var(--md-sys-color-on-primary)',
                   padding: '4px 10px',
                   borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
-                  fontWeight: 'bold',
+                  fontWeight: 700,
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '6px',
@@ -130,13 +206,13 @@ export function HariIni() {
                     borderRadius: '50%',
                     backgroundColor: 'var(--md-sys-color-on-primary)',
                     display: 'inline-block',
-                    animation: 'pulse 1.5s infinite',
+                    animation: 'bs-skeleton-pulse 1.2s infinite',
                   }}
                 />
                 SEDANG BERLANGSUNG
               </span>
 
-              <span className="typescale-title-medium" style={{ fontWeight: 'bold' }}>
+              <span className="typescale-title-medium tabular" style={{ fontWeight: 700 }}>
                 {sesiAktif.jamMulai} – {sesiAktif.jamSelesai}
               </span>
             </div>
@@ -144,6 +220,43 @@ export function HariIni() {
             <h2 className="typescale-headline-small" style={{ margin: '12px 0 4px 0' }}>
               {matkulSesiAktif.nama}
             </h2>
+
+            {/* Progress bar durasi sesi */}
+            {infoProgresSesi && (
+              <div style={{ marginTop: '10px', marginBottom: '10px' }}>
+                <div
+                  style={{
+                    height: '6px',
+                    width: '100%',
+                    backgroundColor: 'rgba(0, 0, 0, 0.12)',
+                    borderRadius: '4px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${infoProgresSesi.progressPct}%`,
+                      backgroundColor: 'var(--md-sys-color-primary)',
+                      borderRadius: '4px',
+                      transition: 'width 300ms ease',
+                    }}
+                  />
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    marginTop: '4px',
+                    fontSize: 'var(--md-sys-typescale-label-small-size)',
+                    opacity: 0.9,
+                  }}
+                >
+                  <span>{Math.round(infoProgresSesi.progressPct)}% selesai</span>
+                  <span>Sisa {infoProgresSesi.sisaMenit} menit lagi</span>
+                </div>
+              </div>
+            )}
 
             <div
               style={{
@@ -176,11 +289,12 @@ export function HariIni() {
                 onClick={() => openQuickAdd(matkulSesiAktif.id)}
                 style={{ width: '100%' }}
               >
-                + Tugas untuk Mata Kuliah Ini
+                + Catat Tugas untuk Matkul Ini
               </Button>
             </div>
           </Card>
         ) : infoBerikutnya && matkulBerikutnya ? (
+          /* Sesi Kelas Berikutnya */
           <Card
             variant="filled"
             style={{
@@ -196,15 +310,15 @@ export function HariIni() {
                   color: 'var(--md-sys-color-on-secondary-container)',
                   padding: '3px 8px',
                   borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
-                  fontWeight: 'bold',
+                  fontWeight: 700,
                 }}
               >
                 KELAS BERIKUTNYA
               </span>
 
               <span
-                className="typescale-label-medium"
-                style={{ color: 'var(--md-sys-color-primary)', fontWeight: 'bold' }}
+                className="typescale-label-medium tabular"
+                style={{ color: 'var(--md-sys-color-primary)', fontWeight: 700 }}
               >
                 {formatHitungMundur(infoBerikutnya.tanggalMs)}
               </span>
@@ -223,7 +337,7 @@ export function HariIni() {
                 marginTop: '4px',
               }}
             >
-              <span className="typescale-body-medium">
+              <span className="typescale-body-medium tabular">
                 {infoBerikutnya.sesi.jamMulai} – {infoBerikutnya.sesi.jamSelesai}
               </span>
               {infoBerikutnya.sesi.ruang && (
@@ -237,6 +351,7 @@ export function HariIni() {
             </div>
           </Card>
         ) : (
+          /* Tidak Ada Sesi Tersisa Hari Ini */
           <Card variant="outlined" style={{ textAlign: 'center', padding: '28px 16px' }}>
             <Icon name="celebration" size="44px" color="var(--md-sys-color-primary)" />
             <h2 className="typescale-title-medium" style={{ margin: '8px 0 4px 0' }}>
@@ -250,23 +365,26 @@ export function HariIni() {
       </div>
 
       {/* Timeline Kelas Hari Ini */}
-      <div style={{ marginBottom: '28px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h2 className="typescale-title-medium" style={{ margin: 0 }}>
-            Jadwal Hari Ini
-          </h2>
+      <Section
+        title="Jadwal Hari Ini"
+        trailing={
           <Button variant="text" onClick={() => navigate('/jadwal')}>
-            Lihat Minggu Ini
+            Lihat Jadwal
           </Button>
-        </div>
-
-        {sesiHariIni.length === 0 ? (
-          <Card variant="outlined" style={{ textAlign: 'center', padding: '24px 16px' }}>
-            <Icon name="free_cancellation" size="36px" color="var(--md-sys-color-outline)" />
-            <p className="typescale-body-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)', marginTop: '8px' }}>
-              Hari ini bebas kelas.
-            </p>
-          </Card>
+        }
+      >
+        {isLoading ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <SkeletonCard />
+            <SkeletonCard />
+          </div>
+        ) : sesiHariIni.length === 0 ? (
+          <EmptyState
+            icon="free_cancellation"
+            title="Hari ini bebas kelas"
+            description="Tidak ada perkuliahan yang dijadwalkan hari ini. Manfaatkan waktu untuk belajar atau beristirahat."
+            variant="card"
+          />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {sesiHariIni.map((sesi: SesiKelas) => {
@@ -281,6 +399,7 @@ export function HariIni() {
                   key={sesi.id}
                   variant={isBerlangsung ? 'filled' : 'outlined'}
                   onClick={() => navigate(`/matkul/${sesi.matkulId}`)}
+                  className="m3-card--interactive"
                   style={{
                     borderLeft: `5px solid ${matkul?.warna || 'var(--md-sys-color-primary)'}`,
                     padding: '12px 14px',
@@ -291,7 +410,7 @@ export function HariIni() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span className="typescale-label-medium" style={{ fontWeight: 'bold' }}>
+                        <span className="typescale-label-medium tabular" style={{ fontWeight: 700 }}>
                           {sesi.jamMulai} – {sesi.jamSelesai}
                         </span>
                         {isBerlangsung && (
@@ -302,7 +421,7 @@ export function HariIni() {
                               color: 'var(--md-sys-color-on-primary)',
                               padding: '1px 6px',
                               borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                              fontWeight: 'bold',
+                              fontWeight: 700,
                             }}
                           >
                             Live
@@ -330,29 +449,26 @@ export function HariIni() {
             })}
           </div>
         )}
-      </div>
+      </Section>
 
       {/* Bagian Tugas Mendesak */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Icon name="assignment_late" size="20px" color="var(--kk-status-mendesak)" />
-            <h2 className="typescale-title-medium" style={{ margin: 0 }}>
-              Tugas Perlu Dikerjakan
-            </h2>
-          </div>
+      <Section
+        title="Tugas Perlu Dikerjakan"
+        trailing={
           <Button variant="text" onClick={() => navigate('/tugas')}>
             Lihat Semua
           </Button>
-        </div>
-
-        {tugasMendesak.length === 0 ? (
-          <Card variant="outlined" style={{ textAlign: 'center', padding: '24px 16px' }}>
-            <Icon name="task_alt" size="36px" color="var(--kk-status-selesai)" />
-            <p className="typescale-body-medium" style={{ color: 'var(--md-sys-color-on-surface-variant)', marginTop: '8px' }}>
-              Hebat! Tidak ada tugas mendesak saat ini.
-            </p>
-          </Card>
+        }
+      >
+        {isLoading ? (
+          <SkeletonCard />
+        ) : tugasMendesak.length === 0 ? (
+          <EmptyState
+            icon="task_alt"
+            title="Tidak ada tugas mendesak"
+            description="Hebat! Semua tugas dalam kendali saat ini."
+            variant="card"
+          />
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {tugasMendesak.map((tugas) => {
@@ -363,8 +479,10 @@ export function HariIni() {
                 <Card
                   key={tugas.id}
                   variant="outlined"
+                  onClick={() => openEditTugas(tugas)}
+                  className="m3-card--interactive"
                   style={{
-                    padding: '12px 14px',
+                    padding: '10px 14px',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -372,14 +490,14 @@ export function HariIni() {
                     borderLeft: `5px solid ${matkul?.warna || 'var(--md-sys-color-primary)'}`,
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                    {/* Centang Selesai Cepat (48px target sentuh) */}
                     <button
                       type="button"
                       aria-label="Selesaikan tugas"
-                      onClick={async () => {
-                        if (typeof navigator !== 'undefined' && navigator.vibrate) {
-                          navigator.vibrate(50);
-                        }
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        haptic('success');
                         await ubahStatusTugas(tugas.id!, 'selesai');
                         showSnackbar({
                           message: 'Tugas diselesaikan 🎉',
@@ -393,50 +511,59 @@ export function HariIni() {
                         background: 'none',
                         border: 'none',
                         cursor: 'pointer',
-                        padding: 0,
+                        padding: '12px',
+                        margin: '-12px',
                         display: 'flex',
                         alignItems: 'center',
+                        justifyContent: 'center',
+                        minWidth: '48px',
+                        minHeight: '48px',
+                        borderRadius: '50%',
+                        WebkitTapHighlightColor: 'transparent',
                       }}
                     >
                       <Icon name="radio_button_unchecked" size="22px" color="var(--md-sys-color-outline)" />
                     </button>
 
-                    <div style={{ flex: 1 }}>
-                      <div className="typescale-body-medium" style={{ fontWeight: '500' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div
+                        className="typescale-body-medium"
+                        style={{
+                          fontWeight: tugas.prioritas ? 700 : 500,
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
+                      >
                         {tugas.judul}
                       </div>
-                      <div className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
+                      <div
+                        className="typescale-body-small"
+                        style={{
+                          color: matkul?.warna || 'var(--md-sys-color-on-surface-variant)',
+                          fontWeight: 700,
+                          fontSize: '12px',
+                        }}
+                      >
                         {matkul?.nama || 'Mata Kuliah'}
                       </div>
                     </div>
                   </div>
 
                   {tugas.tenggat && (
-                    <span
-                      className="typescale-label-small"
-                      style={{
-                        color: terlambat ? 'var(--kk-status-terlambat)' : 'var(--kk-status-mendesak)',
-                        fontWeight: 'bold',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                        backgroundColor: terlambat
-                          ? 'var(--kk-status-terlambat-container)'
-                          : 'var(--kk-status-mendesak-container)',
-                        padding: '2px 8px',
-                        borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                      }}
-                    >
-                      {terlambat ? <Icon name="warning" size="14px" /> : <Icon name="schedule" size="14px" />}
-                      {formatTenggat(tugas.tenggat)}
-                    </span>
+                    <StatusPill
+                      status={terlambat ? 'terlambat' : 'mendesak'}
+                      label={formatTenggat(tugas.tenggat)}
+                    />
                   )}
                 </Card>
               );
             })}
           </div>
         )}
-      </div>
-    </div>
+      </Section>
+    </Screen>
   );
 }
+
+export default HariIni;

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import {
   Card,
@@ -7,9 +7,20 @@ import {
   Dialog,
   Icon,
   Select,
+  ChipSet,
+  FilterChip,
   showSnackbar,
   useRegisterFab,
 } from '../ui/index.js';
+import {
+  Screen,
+  ScreenHeader,
+  EmptyState,
+  SkeletonCard,
+  StatusPill,
+  MetaRow,
+  MetaItem,
+} from '../ui/layout/index.js';
 import {
   useDaftarSemester,
   useSemesterAktif,
@@ -22,10 +33,20 @@ import {
   type MataKuliah as MataKuliahType,
 } from '../data/repo/index.js';
 import { DAFTAR_WARNA_MATKUL, dapatkanWarnaMatkulDefault } from '../lib/warna.js';
+import { apakahTerlambat } from '../lib/tanggal.js';
+import { haptic } from '../lib/haptic.js';
+
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return 'MK';
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
 
 export function MataKuliah() {
   const navigate = useNavigate();
-  const daftarSemester = useDaftarSemester() || [];
+  const daftarSemesterRaw = useDaftarSemester();
+  const daftarSemester = daftarSemesterRaw || [];
   const semesterAktif = useSemesterAktif();
   const [semesterTerpilihId, setSemesterTerpilihId] = useState<number | null>(null);
 
@@ -45,9 +66,12 @@ export function MataKuliah() {
     semesterAktif ||
     daftarSemester[0];
 
-  const daftarMatkul = useDaftarMatkul(targetSemester?.id) || [];
-  const semuaSesi = useSemuaSesi() || [];
-  const semuaTugas = useDaftarTugas() || [];
+  const daftarMatkulRaw = useDaftarMatkul(targetSemester?.id);
+  const daftarMatkul = daftarMatkulRaw || [];
+  const semuaSesiRaw = useSemuaSesi();
+  const semuaSesi = semuaSesiRaw || [];
+  const semuaTugasRaw = useDaftarTugas();
+  const semuaTugas = semuaTugasRaw || [];
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pilihanSemesterId, setPilihanSemesterId] = useState<number | null>(null);
@@ -59,7 +83,14 @@ export function MataKuliah() {
   const [ruangDefault, setRuangDefault] = useState('');
   const [warnaPilihan, setWarnaPilihan] = useState(DAFTAR_WARNA_MATKUL[0]);
 
+  // Hitung total SKS semester terpilih
+  const totalSks = useMemo(
+    () => daftarMatkul.reduce((acc, m) => acc + (m.sks || 0), 0),
+    [daftarMatkul]
+  );
+
   const bukaDialogTambah = () => {
+    haptic('light');
     const defaultColor = dapatkanWarnaMatkulDefault(daftarMatkul.length);
     setNama('');
     setNamaError('');
@@ -89,6 +120,7 @@ export function MataKuliah() {
     const namaBersih = nama.trim();
     if (!namaBersih) {
       setNamaError('Nama mata kuliah wajib diisi');
+      haptic('error');
       showSnackbar({ message: 'Harap isi nama mata kuliah terlebih dahulu' });
       return;
     }
@@ -122,204 +154,259 @@ export function MataKuliah() {
         warna: warnaPilihan,
       });
 
+      haptic('success');
       setDialogOpen(false);
       showSnackbar({ message: `Mata kuliah "${namaBersih}" berhasil ditambahkan 🎉` });
     } catch (err) {
       console.error('Gagal menambahkan mata kuliah:', err);
+      haptic('error');
       showSnackbar({ message: 'Gagal menambahkan mata kuliah. Coba lagi.' });
     }
   };
 
+  const isLoading = daftarSemesterRaw === undefined || daftarMatkulRaw === undefined;
+
   return (
-    <div style={{ padding: '16px', maxWidth: '640px', margin: '0 auto', width: '100%', paddingBottom: 'calc(130px + env(safe-area-inset-bottom, 0px))' }}>
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '16px',
-          gap: '12px',
-        }}
-      >
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <h1 className="typescale-headline-small" style={{ margin: 0 }}>
-            Mata Kuliah
-          </h1>
-          <p
-            className="typescale-body-small"
-            style={{ color: 'var(--md-sys-color-on-surface-variant)', marginTop: '2px' }}
-          >
-            {targetSemester ? targetSemester.nama : 'Semester Aktif'} · {daftarMatkul.length} mata kuliah
-          </p>
-        </div>
-      </div>
+    <Screen size="normal">
+      {/* Header Halaman */}
+      <ScreenHeader
+        title="Mata Kuliah"
+        subtitle={
+          targetSemester
+            ? `${targetSemester.nama} · ${daftarMatkul.length} mata kuliah · ${totalSks} SKS`
+            : `${daftarMatkul.length} mata kuliah · ${totalSks} SKS`
+        }
+      />
 
       {/* Pilihan Semester jika lebih dari 1 */}
       {daftarSemester.length > 1 && (
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            overflowX: 'auto',
-            paddingBottom: '8px',
-            marginBottom: '16px',
-          }}
-        >
-          {daftarSemester.map((sem) => {
-            const isSelected = sem.id === targetSemester?.id;
-            return (
-              <button
-                key={sem.id}
-                type="button"
-                onClick={() => setSemesterTerpilihId(sem.id!)}
-                style={{
-                  padding: '6px 14px',
-                  borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
-                  border: isSelected
-                    ? '1px solid var(--md-sys-color-primary)'
-                    : '1px solid var(--md-sys-color-outline-variant)',
-                  backgroundColor: isSelected
-                    ? 'var(--md-sys-color-primary-container)'
-                    : 'var(--md-sys-color-surface-container)',
-                  color: isSelected
-                    ? 'var(--md-sys-color-on-primary-container)'
-                    : 'var(--md-sys-color-on-surface)',
-                  cursor: 'pointer',
-                  fontSize: 'var(--md-sys-typescale-label-medium-size)',
-                  fontFamily: 'var(--md-ref-typeface-brand)',
-                  fontWeight: isSelected ? 'bold' : 'normal',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {sem.nama} {sem.aktif ? '★' : ''}
-              </button>
-            );
-          })}
+        <div style={{ marginBottom: '16px', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+          <ChipSet>
+            {daftarSemester.map((sem) => {
+              const isSelected = sem.id === targetSemester?.id;
+              return (
+                <FilterChip
+                  key={sem.id}
+                  label={`${sem.nama}${sem.aktif ? ' ★' : ''}`}
+                  selected={isSelected}
+                  onClick={() => {
+                    haptic('selection');
+                    setSemesterTerpilihId(sem.id!);
+                  }}
+                />
+              );
+            })}
+          </ChipSet>
         </div>
       )}
 
       {/* Daftar Kartu Mata Kuliah */}
-      {daftarMatkul.length === 0 ? (
-        <Card variant="outlined" style={{ textAlign: 'center', padding: '36px 16px' }}>
-          <Icon name="menu_book" size="48px" color="var(--md-sys-color-primary)" />
-          <h2 className="typescale-title-medium" style={{ margin: '12px 0 4px 0' }}>
-            Belum ada mata kuliah
-          </h2>
-          <p
-            className="typescale-body-medium"
-            style={{ color: 'var(--md-sys-color-on-surface-variant)', marginBottom: '16px' }}
-          >
-            Tambahkan mata kuliah untuk mulai mengatur jadwal dan mencatat tugas.
-          </p>
-          <Button
-            variant="filled"
-            icon="add"
-            onClick={bukaDialogTambah}
-            style={{
-              padding: '12px 24px',
-              fontSize: 'var(--md-sys-typescale-label-large-size, 15px)',
-              fontWeight: 700,
-              borderRadius: 'var(--md-sys-shape-corner-medium, 16px)',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.14)',
-            }}
-          >
-            Tambah Mata Kuliah
-          </Button>
-        </Card>
+      {isLoading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+      ) : daftarMatkul.length === 0 ? (
+        <EmptyState
+          icon="menu_book"
+          title="Belum ada mata kuliah"
+          description="Tambahkan mata kuliah untuk mulai mengatur jadwal dan mencatat tugas."
+          action={{
+            label: 'Tambah Mata Kuliah',
+            icon: 'add',
+            onClick: bukaDialogTambah,
+          }}
+        />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {daftarMatkul.map((matkul: MataKuliahType) => {
             const sesiMatkul = semuaSesi.filter((s) => s.matkulId === matkul.id);
-            const tugasAktif = semuaTugas.filter((t) => t.matkulId === matkul.id && t.status !== 'selesai');
+            const tugasAktif = semuaTugas.filter(
+              (t) => t.matkulId === matkul.id && t.status !== 'selesai'
+            );
+            const tugasTerlambat = tugasAktif.filter((t) =>
+              apakahTerlambat(t.tenggat, t.status)
+            );
 
             return (
               <Card
                 key={matkul.id}
                 variant="filled"
-                onClick={() => navigate(`/matkul/${matkul.id}`)}
+                interactive
+                onClick={() => {
+                  haptic('light');
+                  navigate(`/matkul/${matkul.id}`);
+                }}
                 style={{
-                  borderLeft: `6px solid ${matkul.warna}`,
                   padding: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '8px',
+                  position: 'relative',
+                  overflow: 'hidden',
                 }}
               >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <h2 className="typescale-title-large" style={{ margin: 0 }}>
-                      {matkul.nama}
-                    </h2>
-                    {matkul.kode && (
-                      <span
-                        className="typescale-label-small"
-                        style={{
-                          backgroundColor: 'var(--md-sys-color-surface-container-high)',
-                          padding: '2px 6px',
-                          borderRadius: 'var(--md-sys-shape-corner-small, 8px)',
-                          marginRight: '6px',
-                        }}
-                      >
-                        {matkul.kode}
-                      </span>
-                    )}
-                    {matkul.sks && (
-                      <span className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
-                        {matkul.sks} SKS
-                      </span>
-                    )}
-                  </div>
-
-                  {tugasAktif.length > 0 && (
-                    <span
-                      className="typescale-label-small"
-                      style={{
-                        backgroundColor: 'var(--md-sys-color-error-container)',
-                        color: 'var(--md-sys-color-on-error-container)',
-                        padding: '4px 8px',
-                        borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      <Icon name="assignment" size="14px" />
-                      {tugasAktif.length} tugas
-                    </span>
-                  )}
-                </div>
-
-                {matkul.dosen && (
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      color: 'var(--md-sys-color-on-surface-variant)',
-                    }}
-                  >
-                    <Icon name="person" size="16px" />
-                    <span className="typescale-body-small">{matkul.dosen}</span>
-                  </div>
-                )}
+                {/* Border aksen vertikal kiri */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: '5px',
+                    backgroundColor: matkul.warna,
+                  }}
+                />
 
                 <div
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginTop: '4px',
-                    paddingTop: '8px',
-                    borderTop: '1px solid var(--md-sys-color-surface-variant)',
+                    alignItems: 'flex-start',
+                    gap: '14px',
+                    paddingLeft: '4px',
                   }}
                 >
-                  <span className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
-                    {sesiMatkul.length} sesi pertemuan per minggu
-                  </span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px', color: 'var(--md-sys-color-primary)' }}>
-                    <span className="typescale-label-medium">Detail</span>
-                    <Icon name="chevron_right" size="18px" />
+                  {/* Avatar Inisial Berwarna */}
+                  <div
+                    style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: 'var(--md-sys-shape-corner-medium, 14px)',
+                      backgroundColor: matkul.warna,
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '15px',
+                      letterSpacing: '0.5px',
+                      flexShrink: 0,
+                      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.15)',
+                    }}
+                  >
+                    {getInitials(matkul.nama)}
+                  </div>
+
+                  {/* Konten Utama */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'space-between',
+                        gap: '8px',
+                      }}
+                    >
+                      <h2
+                        className="typescale-title-medium"
+                        style={{
+                          margin: 0,
+                          fontWeight: 700,
+                          lineHeight: 1.3,
+                          wordBreak: 'break-word',
+                        }}
+                      >
+                        {matkul.nama}
+                      </h2>
+
+                      {/* Status Pill Tugas */}
+                      {tugasTerlambat.length > 0 ? (
+                        <StatusPill
+                          status="terlambat"
+                          icon="warning"
+                          size="small"
+                          label={`${tugasTerlambat.length} terlambat`}
+                        />
+                      ) : tugasAktif.length > 0 ? (
+                        <StatusPill
+                          status="info"
+                          icon="assignment"
+                          size="small"
+                          label={`${tugasAktif.length} tugas`}
+                        />
+                      ) : null}
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginTop: '6px',
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      {matkul.kode && (
+                        <span
+                          className="typescale-label-small"
+                          style={{
+                            backgroundColor: 'var(--md-sys-color-surface-container-high)',
+                            padding: '2px 8px',
+                            borderRadius: 'var(--md-sys-shape-corner-small, 6px)',
+                            fontWeight: 700,
+                            color: 'var(--md-sys-color-on-surface-variant)',
+                          }}
+                        >
+                          {matkul.kode}
+                        </span>
+                      )}
+                      <span
+                        className="typescale-body-small"
+                        style={{
+                          color: 'var(--md-sys-color-on-surface-variant)',
+                          fontWeight: 600,
+                        }}
+                      >
+                        {matkul.sks || 0} SKS
+                      </span>
+                      {matkul.ruangDefault && (
+                        <span
+                          className="typescale-body-small"
+                          style={{ color: 'var(--md-sys-color-on-surface-variant)' }}
+                        >
+                          · R. {matkul.ruangDefault}
+                        </span>
+                      )}
+                    </div>
+
+                    {matkul.dosen && (
+                      <div style={{ marginTop: '8px' }}>
+                        <MetaRow>
+                          <MetaItem icon="person" text={matkul.dosen} />
+                        </MetaRow>
+                      </div>
+                    )}
+
+                    {/* Footer bar kartu */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginTop: '12px',
+                        paddingTop: '10px',
+                        borderTop: '1px solid var(--md-sys-color-outline-variant)',
+                      }}
+                    >
+                      <span
+                        className="typescale-body-small"
+                        style={{ color: 'var(--md-sys-color-on-surface-variant)' }}
+                      >
+                        {sesiMatkul.length > 0
+                          ? `${sesiMatkul.length} sesi pertemuan/minggu`
+                          : 'Belum ada jadwal'}
+                      </span>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '2px',
+                          color: 'var(--md-sys-color-primary)',
+                          fontWeight: 700,
+                        }}
+                      >
+                        <span className="typescale-label-medium">Detail</span>
+                        <Icon name="chevron_right" size="18px" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -395,7 +482,15 @@ export function MataKuliah() {
               }}
             />
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '10px', width: '100%', boxSizing: 'border-box' }}>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                gap: '10px',
+                width: '100%',
+                boxSizing: 'border-box',
+              }}
+            >
               <div style={{ minWidth: 0, width: '100%' }}>
                 <TextField
                   label="Kode Mata Kuliah"
@@ -509,7 +604,10 @@ export function MataKuliah() {
                     key={colorToken}
                     type="button"
                     aria-label={`Pilih warna ${colorToken}`}
-                    onClick={() => setWarnaPilihan(colorToken)}
+                    onClick={() => {
+                      haptic('selection');
+                      setWarnaPilihan(colorToken);
+                    }}
                     style={{
                       width: '38px',
                       height: '38px',
@@ -519,7 +617,7 @@ export function MataKuliah() {
                         ? '3px solid var(--md-sys-color-on-surface)'
                         : '2px solid transparent',
                       transform: isSelected ? 'scale(1.1)' : 'scale(1)',
-                      boxShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.2)' : 'none',
+                      boxShadow: isSelected ? '0 2px 8px rgba(0,0,0,0.25)' : 'none',
                       transition: 'all 150ms ease',
                       cursor: 'pointer',
                       display: 'flex',
@@ -529,7 +627,7 @@ export function MataKuliah() {
                     }}
                   >
                     {isSelected && (
-                      <Icon name="check" size="20px" color="var(--md-sys-color-on-primary)" />
+                      <Icon name="check" size="20px" color="#ffffff" />
                     )}
                   </button>
                 );
@@ -538,6 +636,6 @@ export function MataKuliah() {
           </div>
         </div>
       </Dialog>
-    </div>
+    </Screen>
   );
 }

@@ -39,7 +39,10 @@ export const useFabStore = create<FabState>((set) => ({
 export function useRegisterFab(action: FabAction | null) {
   const setAction = useFabStore((s) => s.setAction);
   const actionRef = useRef(action);
-  actionRef.current = action;
+
+  useEffect(() => {
+    actionRef.current = action;
+  });
 
   useEffect(() => {
     if (!action) {

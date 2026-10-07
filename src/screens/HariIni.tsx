@@ -362,6 +362,8 @@ export function HariIni() {
           /* Sesi Kelas Berikutnya */
           <Card
             variant="filled"
+            onClick={() => navigate(`/matkul/${matkulBerikutnya.id}`)}
+            className="m3-card--interactive"
             style={{
               borderLeft: `6px solid ${matkulBerikutnya.warna}`,
               padding: '20px',
@@ -391,31 +393,57 @@ export function HariIni() {
               </span>
             </div>
 
-            <h2 className="typescale-title-large" style={{ margin: '10px 0 4px 0' }}>
+            <h2 className="typescale-title-large" style={{ margin: '10px 0 6px 0' }}>
               {matkulBerikutnya.nama}
             </h2>
 
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
+                flexDirection: 'column',
+                gap: '8px',
+                marginTop: '10px',
                 color: 'var(--md-sys-color-on-surface-variant)',
-                marginTop: '4px',
               }}
             >
-              <span className="typescale-body-medium tabular">
-                {!infoBerikutnya.hariSama ? `${getNamaHari(infoBerikutnya.sesi.hari)}, ` : ''}
-                {infoBerikutnya.sesi.jamMulai} – {infoBerikutnya.sesi.jamSelesai}
-              </span>
-              {infoBerikutnya.sesi.ruang && (
-                <span className="typescale-body-medium">
-                  · Ruang {infoBerikutnya.sesi.ruang}
+              {/* Hari & Waktu */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Icon name="schedule" size="18px" color="var(--md-sys-color-primary)" />
+                <span className="typescale-body-medium tabular">
+                  {!infoBerikutnya.hariSama ? `${getNamaHari(infoBerikutnya.sesi.hari)}, ` : 'Hari ini, '}
+                  {infoBerikutnya.sesi.jamMulai} – {infoBerikutnya.sesi.jamSelesai}
                 </span>
+              </div>
+
+              {/* Ruang */}
+              {infoBerikutnya.sesi.ruang && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Icon name="meeting_room" size="18px" />
+                  <span className="typescale-body-medium">
+                    {infoBerikutnya.sesi.ruang.toLowerCase().startsWith('ruang')
+                      ? infoBerikutnya.sesi.ruang
+                      : `Ruang ${infoBerikutnya.sesi.ruang}`}
+                  </span>
+                </div>
               )}
-              <span className="typescale-body-medium" style={{ textTransform: 'capitalize' }}>
-                · {infoBerikutnya.sesi.tipe}
-              </span>
+
+              {/* Tipe Kuliah (Praktikum / Teori) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Icon name="school" size="18px" />
+                <span className="typescale-body-medium" style={{ textTransform: 'capitalize' }}>
+                  {infoBerikutnya.sesi.tipe}
+                </span>
+              </div>
+
+              {/* Dosen (jika ada) */}
+              {matkulBerikutnya.dosen && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Icon name="person" size="18px" />
+                  <span className="typescale-body-medium">
+                    {matkulBerikutnya.dosen}
+                  </span>
+                </div>
+              )}
             </div>
           </Card>
         ) : (

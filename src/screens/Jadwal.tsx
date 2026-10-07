@@ -555,6 +555,7 @@ export function Jadwal() {
               value: String(m.id),
               label: m.nama,
               supportingText: m.kode ? `${m.kode} · ${m.sks} SKS` : undefined,
+              color: m.warna,
             }))}
           />
 

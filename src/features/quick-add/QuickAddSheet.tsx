@@ -351,6 +351,7 @@ export function QuickAddSheet() {
               value: String(m.id),
               label: m.nama,
               supportingText: m.kode ? `${m.kode} · ${m.dosen || ''}` : m.dosen,
+              color: m.warna,
             }))}
           />
         ) : (

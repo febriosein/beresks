@@ -45,7 +45,7 @@ export function Pengaturan() {
   const daftarTugas = useDaftarTugas() || [];
   const pengaturan = usePengaturan();
 
-  useRegisterFab({ hide: true, label: '', icon: '', onClick: () => {} });
+  useRegisterFab({ hide: true, label: '', icon: '', onClick: () => { } });
 
   // State Dialog Tambah Semester
   const [dialogSemesterOpen, setDialogSemesterOpen] = useState(false);
@@ -476,11 +476,8 @@ export function Pengaturan() {
               />
             </div>
             <h3 className="typescale-title-medium" style={{ margin: '10px 0 2px 0', fontWeight: 800 }}>
-              BereSKS v0.3
+              BereSKS v1.5.1
             </h3>
-            <p className="typescale-body-small" style={{ color: 'var(--md-sys-color-on-surface-variant)', margin: 0 }}>
-              Aplikasi PWA Offline-First · Material Design 3 · Tanpa Akun & Tanpa Iklan
-            </p>
           </Card>
         </div>
       </div>

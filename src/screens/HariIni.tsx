@@ -24,11 +24,17 @@ import {
 } from '../data/repo/index.js';
 import {
   parseWaktuKeMenit,
-  cariSesiSedangBerlangsungAtauBaruBerakhir,
+  cariSesiAktifHariIni,
   cariSesiBerikutnya,
 } from '../features/jadwal/sesiHelpers.js';
 import { useQuickAddStore } from '../features/quick-add/useQuickAddStore.js';
-import { formatTanggalLengkap, formatHitungMundur, formatTenggat, apakahTerlambat } from '../lib/tanggal.js';
+import {
+  formatTanggalLengkap,
+  formatHitungMundur,
+  formatTenggat,
+  apakahTerlambat,
+  getNamaHari,
+} from '../lib/tanggal.js';
 import { haptic } from '../lib/haptic.js';
 
 export function HariIni() {
@@ -43,13 +49,28 @@ export function HariIni() {
 
   const { openQuickAdd, openEditTugas } = useQuickAddStore();
 
-  // Tick timer per menit untuk memperbarui hitung mundur secara real time
+  // Tick timer per 30 detik untuk memperbarui status & hitung mundur secara real time
+  // Didukung listener visibilitychange & focus agar langsung sinkron saat PWA dibuka kembali di iOS/mobile
   const [sekarang, setSekarang] = useState(() => new Date());
   useEffect(() => {
-    const timer = setInterval(() => {
-      setSekarang(new Date());
-    }, 60000);
-    return () => clearInterval(timer);
+    const sinkronkanWaktu = () => setSekarang(new Date());
+
+    const timer = setInterval(sinkronkanWaktu, 30000);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        sinkronkanWaktu();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', sinkronkanWaktu);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', sinkronkanWaktu);
+    };
   }, []);
 
   // Ucapan sapaan waktu
@@ -71,11 +92,13 @@ export function HariIni() {
       .sort((a, b) => parseWaktuKeMenit(a.jamMulai) - parseWaktuKeMenit(b.jamMulai));
   }, [semuaSesi, hariIniIso]);
 
-  // Cek sesi sedang berlangsung
-  const sesiAktif = useMemo(
-    () => cariSesiSedangBerlangsungAtauBaruBerakhir(semuaSesi, sekarang),
+  // Cek sesi aktif hari ini (berlangsung atau baru selesai dengan toleransi 10 menit jika kelas terakhir)
+  const infoSesiAktif = useMemo(
+    () => cariSesiAktifHariIni(semuaSesi, sekarang),
     [semuaSesi, sekarang]
   );
+  const sesiAktif = infoSesiAktif?.sesi ?? null;
+  const statusAktif = infoSesiAktif?.status ?? null;
   const matkulSesiAktif = sesiAktif ? daftarMatkul.find((m) => m.id === sesiAktif.matkulId) : null;
 
   // Hitung sisa menit & progress sesi aktif
@@ -87,7 +110,8 @@ export function HariIni() {
     const lewat = menitSekarang - mulai;
     const pct = Math.min(100, Math.max(0, (lewat / totalDurasi) * 100));
     const sisa = Math.max(0, selesai - menitSekarang);
-    return { progressPct: pct, sisaMenit: sisa };
+    const selesaiMenitLalu = Math.max(0, menitSekarang - selesai);
+    return { progressPct: pct, sisaMenit: sisa, selesaiMenitLalu };
   }, [sesiAktif, menitSekarang]);
 
   // Cek sesi berikutnya
@@ -175,42 +199,67 @@ export function HariIni() {
         {isLoading ? (
           <SkeletonCard />
         ) : sesiAktif && matkulSesiAktif ? (
-          /* Sesi Sedang Berlangsung */
+          /* Sesi Sedang Berlangsung atau Baru Selesai (Toleransi 10 Menit Kelas Terakhir) */
           <Card
             variant="filled"
             style={{
               borderLeft: `6px solid ${matkulSesiAktif.warna}`,
-              backgroundColor: 'var(--md-sys-color-primary-container)',
-              color: 'var(--md-sys-color-on-primary-container)',
+              backgroundColor:
+                statusAktif === 'baru_selesai'
+                  ? 'var(--md-sys-color-surface-container-high)'
+                  : 'var(--md-sys-color-primary-container)',
+              color:
+                statusAktif === 'baru_selesai'
+                  ? 'var(--md-sys-color-on-surface)'
+                  : 'var(--md-sys-color-on-primary-container)',
               padding: '20px',
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span
-                className="typescale-label-small"
-                style={{
-                  backgroundColor: 'var(--md-sys-color-primary)',
-                  color: 'var(--md-sys-color-on-primary)',
-                  padding: '4px 10px',
-                  borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
-                  fontWeight: 700,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                }}
-              >
+              {statusAktif === 'baru_selesai' ? (
                 <span
+                  className="typescale-label-small"
                   style={{
-                    width: '8px',
-                    height: '8px',
-                    borderRadius: '50%',
-                    backgroundColor: 'var(--md-sys-color-on-primary)',
-                    display: 'inline-block',
-                    animation: 'bs-skeleton-pulse 1.2s infinite',
+                    backgroundColor: 'var(--md-sys-color-secondary-container)',
+                    color: 'var(--md-sys-color-on-secondary-container)',
+                    padding: '4px 10px',
+                    borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
                   }}
-                />
-                SEDANG BERLANGSUNG
-              </span>
+                >
+                  <Icon name="check_circle" size="14px" />
+                  BARU SELESAI
+                </span>
+              ) : (
+                <span
+                  className="typescale-label-small"
+                  style={{
+                    backgroundColor: 'var(--md-sys-color-primary)',
+                    color: 'var(--md-sys-color-on-primary)',
+                    padding: '4px 10px',
+                    borderRadius: 'var(--md-sys-shape-corner-full, 9999px)',
+                    fontWeight: 700,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <span
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--md-sys-color-on-primary)',
+                      display: 'inline-block',
+                      animation: 'bs-skeleton-pulse 1.2s infinite',
+                    }}
+                  />
+                  SEDANG BERLANGSUNG
+                </span>
+              )}
 
               <span className="typescale-title-medium tabular" style={{ fontWeight: 700 }}>
                 {sesiAktif.jamMulai} – {sesiAktif.jamSelesai}
@@ -237,7 +286,10 @@ export function HariIni() {
                     style={{
                       height: '100%',
                       width: `${infoProgresSesi.progressPct}%`,
-                      backgroundColor: 'var(--md-sys-color-primary)',
+                      backgroundColor:
+                        statusAktif === 'baru_selesai'
+                          ? 'var(--md-sys-color-secondary)'
+                          : 'var(--md-sys-color-primary)',
                       borderRadius: '4px',
                       transition: 'width 300ms ease',
                     }}
@@ -252,8 +304,21 @@ export function HariIni() {
                     opacity: 0.9,
                   }}
                 >
-                  <span>{Math.round(infoProgresSesi.progressPct)}% selesai</span>
-                  <span>Sisa {infoProgresSesi.sisaMenit} menit lagi</span>
+                  {statusAktif === 'baru_selesai' ? (
+                    <>
+                      <span>Kelas selesai 🎉</span>
+                      <span>
+                        {infoProgresSesi.selesaiMenitLalu === 0
+                          ? 'Selesai baru saja'
+                          : `Selesai ${infoProgresSesi.selesaiMenitLalu} menit lalu`}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{Math.round(infoProgresSesi.progressPct)}% selesai</span>
+                      <span>Sisa {infoProgresSesi.sisaMenit} menit lagi</span>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -284,7 +349,7 @@ export function HariIni() {
 
             <div style={{ marginTop: '16px' }}>
               <Button
-                variant="filled"
+                variant={statusAktif === 'baru_selesai' ? 'outlined' : 'filled'}
                 icon="add_task"
                 onClick={() => openQuickAdd(matkulSesiAktif.id)}
                 style={{ width: '100%' }}
@@ -313,7 +378,9 @@ export function HariIni() {
                   fontWeight: 700,
                 }}
               >
-                KELAS BERIKUTNYA
+                {infoBerikutnya.hariSama
+                  ? 'KELAS BERIKUTNYA'
+                  : `KELAS BERIKUTNYA (${getNamaHari(infoBerikutnya.sesi.hari)})`}
               </span>
 
               <span
@@ -338,6 +405,7 @@ export function HariIni() {
               }}
             >
               <span className="typescale-body-medium tabular">
+                {!infoBerikutnya.hariSama ? `${getNamaHari(infoBerikutnya.sesi.hari)}, ` : ''}
                 {infoBerikutnya.sesi.jamMulai} – {infoBerikutnya.sesi.jamSelesai}
               </span>
               {infoBerikutnya.sesi.ruang && (
@@ -391,8 +459,8 @@ export function HariIni() {
               const matkul = daftarMatkul.find((m) => m.id === sesi.matkulId);
               const mulai = parseWaktuKeMenit(sesi.jamMulai);
               const selesai = parseWaktuKeMenit(sesi.jamSelesai);
-              const isBerlangsung = menitSekarang >= mulai && menitSekarang <= selesai;
-              const sudahLewat = menitSekarang > selesai;
+              const isBerlangsung = menitSekarang >= mulai && menitSekarang < selesai;
+              const sudahLewat = menitSekarang >= selesai;
 
               return (
                 <Card

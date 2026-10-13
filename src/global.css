@@ -267,6 +267,36 @@ md-dialog::part(scrim) {
   background-color: rgba(0, 0, 0, 0.45);
 }
 
+/* Material Design 3 Web Components - Cards */
+md-elevated-card,
+md-filled-card,
+md-outlined-card {
+  --md-elevated-card-container-shape: var(--md-sys-shape-corner-large, 16px);
+  --md-filled-card-container-shape: var(--md-sys-shape-corner-large, 16px);
+  --md-outlined-card-container-shape: var(--md-sys-shape-corner-large, 16px);
+  --md-filled-card-container-color: var(--md-sys-color-surface-container);
+  box-sizing: border-box;
+}
+
+md-elevated-card:focus-visible,
+md-filled-card:focus-visible,
+md-outlined-card:focus-visible {
+  outline: none;
+}
+
+/* Material elevation transitions on hover for interactive cards */
+md-elevated-card.m3-card--interactive:hover {
+  --md-elevated-card-container-elevation: 2;
+}
+
+md-filled-card.m3-card--interactive:hover {
+  --md-filled-card-container-elevation: 1;
+}
+
+md-outlined-card.m3-card--interactive:hover {
+  --md-outlined-card-container-elevation: 1;
+}
+
 /* Card Interactive Layer */
 .m3-card--interactive {
   cursor: pointer;
@@ -277,25 +307,31 @@ md-dialog::part(scrim) {
               background-color var(--bs-dur-short) ease;
 }
 
-.m3-card--interactive:hover {
+/* Only apply brightness filter to fallback non-web-component cards */
+div.m3-card--interactive:hover,
+button.m3-card--interactive:hover {
   filter: brightness(0.97);
 }
 
-:root[data-theme='dark'] .m3-card--interactive:hover {
+:root[data-theme='dark'] div.m3-card--interactive:hover,
+:root[data-theme='dark'] button.m3-card--interactive:hover {
   filter: brightness(1.05);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .m3-card--interactive:hover {
+  :root:not([data-theme='light']) div.m3-card--interactive:hover,
+  :root:not([data-theme='light']) button.m3-card--interactive:hover {
     filter: brightness(1.05);
   }
 }
 
 .m3-card--interactive:active {
-  transform: scale(0.985);
+  transform: scale(0.99);
 }
 
-.m3-card:focus-visible {
+/* Fallback focus indicator when md-focus-ring is not present */
+div.m3-card:focus-visible,
+button.m3-card:focus-visible {
   outline: 2px solid var(--md-sys-color-primary);
   outline-offset: 2px;
 }
